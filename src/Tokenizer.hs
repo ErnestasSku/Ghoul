@@ -6,7 +6,7 @@
 module Tokenizer where
 
 import Data.Char
-import Control.Applicative
+import Control.Applicative ( Alternative((<|>), empty), optional )
 import Data.Maybe
 
 -- FUTURE: Everything is a string now. 
@@ -20,7 +20,7 @@ data Token
     | Comment String
     | Error --  
 
-    deriving Show
+    deriving (Show, Eq)
 
 -- NOTE: it does not have error reporting. 
 -- In the happy path, it should never really produce any errors,
@@ -122,7 +122,7 @@ comment :: Parser Token
 comment = Comment <$> ((:) <$> parseChar '#' <*> parseWhile (/='\n'))
 
 seperatorList :: [String]
-seperatorList = ["\n", "\r\n", " ", "\t", ";"]
+seperatorList = ["\n", "\r\n", " ", "\t", ";", ","]
 
 seperator :: Parser Token
 seperator = Seperator <$> genListParsers' seperatorList parseSequence
@@ -135,10 +135,13 @@ operatorList = ["[", "]", ".", "(", ")", "{", "}", "~", "-", "*",
                 "&=", "!=", "<<=", ">>=", ":=", ":"]
 
 operator :: Parser Token
-operator = Operator <$> genListParsers operatorList
+operator = Operator <$> genListParsers' operatorList parseSequence
 
 identifier :: Parser Token
-identifier = Identifier <$> parseWhile (not . isSpace)
+identifier = Identifier <$> parseWhile p
+    where
+        p :: Char -> Bool
+        p c = isAlphaNum c || c == '_' || c == '-' || c == '"'
 
 --Generates a mega parser from a list of Strings 
 genListParsers :: [String] -> Parser String
@@ -153,14 +156,15 @@ chunk :: Parser Token
 chunk = seperator <|> keyword <|> comment <|> operator <|> identifier
 
 
-runAll :: [Token] -> String -> [Token]
-runAll acc [] = acc
-runAll acc s =
-    let
-        (s', t) = f (runParser chunk s)
-    in
-        t : runAll acc s'
-
+runAll :: String -> [Token]
+runAll = runAll' [] 
     where
+        runAll' acc [] = acc
+        runAll' acc s =
+            let
+                (s', t) = f (runParser chunk s)
+            in
+                t : runAll' acc s'
+
         f (Just a) = a
         f Nothing = ("", Error)
