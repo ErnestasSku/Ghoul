@@ -6,6 +6,6 @@ This is a linting/style enforcing program written in Haskell, mainly for my own 
 
 ## Project outline:
 
-- [ ] Write a Tokenizer
+- [x] Write a Tokenizer
 - [ ] Write static type checking rules
 - [ ] Consider adding more rules in the future
