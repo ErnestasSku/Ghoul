@@ -128,7 +128,7 @@ seperator :: Parser Token
 seperator = Seperator <$> genListParsers' seperatorList parseSequence
 
 operatorList :: [String]
-operatorList = ["[", "]", ".", "(", ")", "{", "}", "~", "-", "*",
+operatorList = ["->", "[", "]", ".", "(", ")", "{", "}", "~", "-", "*",
                 "/", "%", "+", "-", "<<", ">>", "&", "^", "|", "<",
                 ">", "==", "!=", ">=", "<=", "in", "!", "not", "and",
                 "&&", "or", "||", "=", "+=", "-=", "*=", "/=", "%=",
