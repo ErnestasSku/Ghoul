@@ -27,6 +27,8 @@ library
   exposed-modules:
       Lib
       Tokenizer
+      TypeChecker
+      Utilites
   other-modules:
       Paths_Ghoul
   hs-source-dirs:
