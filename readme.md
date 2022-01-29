@@ -7,10 +7,11 @@ This is a linting/style enforcing program written in Haskell, mainly for my own 
 ## Project outline:
 
 - [x] Write a Tokenizer
-- [ ] Write static type checking rules
+- [x] Write static type checking rules
 - [ ] Consider adding more rules in the future
 - [ ] Adding pretty show
-- [ ] Rewriting parser/tokenizer with more conventional tools (Such as Parsec)
+- [x] Rewriting parser/tokenizer with more conventional tools (Such as Parsec)
+- [ ] Polish out monadic parser tokenizere
 - [ ] Refactor/Rewrite analyser (after rewriting parser/tokenizer)
 - [ ] Add configuration file to customize rules
 - [ ] Add command line utilities

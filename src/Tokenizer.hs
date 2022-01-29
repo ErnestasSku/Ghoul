@@ -5,8 +5,8 @@
 {-# LANGUAGE LambdaCase #-}
 module Tokenizer where
 
+import Control.Applicative ( Alternative((<|>), empty), optional, many )
 import Data.Char
-import Control.Applicative ( Alternative((<|>), empty), optional )
 import Data.Maybe
 
 -- FUTURE: Everything is a string now. 

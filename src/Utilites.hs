@@ -1,7 +1,9 @@
 module Utilites where
 
-import Tokenizer (Token (..), runAll)
+import Tokenizer (Token (..), runAll, Parser (runParser), runnAll)
+import Parsing.Parser
 import GHC.IO
+import Text.Parsec (parse)
 
 -- next (x:xs) = xs
 -- next [] = []
@@ -60,3 +62,38 @@ mkt3 = let
     a  = unsafePerformIO $ readFile "test//GdScript//test3.gd"
     in
         runAll a
+
+
+-- mktT1 :: [Token]
+mktT1 = let
+    --Evil code, should never be used.
+    a  = unsafePerformIO $ readFile "test//GdScript//test3.gd"
+    in
+        runParser runnAll a
+
+-- mkt4 :: [Token]
+-- mkt4 = let
+--     --Evil code, should never be used.
+--     a  = unsafePerformIO $ readFile "test//GdScript//test3.gd"
+--     in 
+--         parse parseAll "testFile" a >>=
+--           -- Left err -> show err
+--           -- Right val -> show val
+
+mkt4 = do
+  a <- readFile "test//GdScript//test1.gd"
+  b <- readFile "test//GdScript//test2.gd"
+  c <- readFile "test//GdScript//test3.gd"
+
+  putStrLn $ readExpr a
+  putStrLn "\n"
+  putStrLn $ readExpr b
+  putStrLn "\n"
+  putStrLn $ readExpr c
+  putStrLn "\n"
+
+
+readExpr :: String -> String
+readExpr input = case parse parseAll "test1" input of
+    Left err -> "No match: \n" ++ show err
+    Right val -> "Found value \n" ++ show val
