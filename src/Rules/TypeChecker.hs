@@ -1,4 +1,4 @@
-module TypeChecker where
+module Rules.TypeChecker where
 
 -- import Tokenizer (Token (Keyword, Operator, Seperator), )
 import Utilites
