@@ -1,5 +1,5 @@
 name:                Ghoul
-version:             0.0.1.1
+version:             0.1.0
 github:              "ErnestasSku/Ghoul"
 license:             BSD3
 author:              "Ernestas Škudzinsas"
@@ -23,7 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - parsec >= 3 && < 4
 - text 
-
+- filepath
 
 library:
   source-dirs: src
