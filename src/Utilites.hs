@@ -7,7 +7,7 @@ module Utilites
 where
 import Parsing.AST ( AST(..), (<!) )
 import System.FilePath (splitPath, (</>))
-
+import System.Console.Pretty
 
 -- | Extracts the String from AST type
 fromASTtoString :: AST -> String
@@ -35,7 +35,7 @@ base <-> file =
 -- createOutputString [] _  _= []
 
 createOutputString :: [(Int, String)] -> FilePath -> [AST] -> [String]
-createOutputString (x:xs) f a = ("File: " ++ f ++ " | line : " ++ show (fst x) ++ reconstructLine (filter (<! fst x) a) ++ " - " ++ snd x ++ "\n" ) : createOutputString xs f a
+createOutputString (x:xs) f a = (color Cyan "File: " ++ color Cyan f ++ color Green " | line :" ++ color Red (show (fst x)) ++ color White (reconstructLine (filter (<! fst x) a)) ++ color Yellow " | " ++ color Yellow (snd x) ++ "\n" ) : createOutputString xs f a
 createOutputString [] _ _ = []
 
 
