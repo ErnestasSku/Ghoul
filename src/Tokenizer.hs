@@ -3,7 +3,7 @@
 -}
 
 {-# LANGUAGE LambdaCase #-}
-module Tokenizer where
+module Tokenizer () where
 
 import Control.Applicative ( Alternative((<|>), empty), optional, many )
 import Data.Char

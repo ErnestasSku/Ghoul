@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           Ghoul
-version:        0.0.1.1
+version:        0.1.0
 description:    Please see the README on GitHub at <https://github.com/ErnestasSku/Ghoul#readme>
 homepage:       https://github.com/ErnestasSku/Ghoul#readme
 bug-reports:    https://github.com/ErnestasSku/Ghoul/issues
@@ -25,11 +25,12 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
       Parsing.AST
       Parsing.Parser
+      Rules.CommentChecker
+      Rules.Rules
+      Rules.TypeChecker
       Tokenizer
-      TypeChecker
       Utilites
   other-modules:
       Paths_Ghoul
@@ -37,7 +38,10 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , filepath
     , parsec ==3.*
+    , pretty-terminal
+    , text
   default-language: Haskell2010
 
 executable Ghoul-exe
@@ -51,7 +55,10 @@ executable Ghoul-exe
       Ghoul
     , base >=4.7 && <5
     , directory ==1.3.*
+    , filepath
     , parsec ==3.*
+    , pretty-terminal
+    , text
   default-language: Haskell2010
 
 test-suite Ghoul-test
@@ -66,5 +73,8 @@ test-suite Ghoul-test
       Ghoul
     , HUnit
     , base >=4.7 && <5
+    , filepath
     , parsec ==3.*
+    , pretty-terminal
+    , text
   default-language: Haskell2010

@@ -1,82 +1,44 @@
-module Utilites where
+module Utilites
+  ( fromASTtoString
+  , (<->)
+  , createOutputString
+  , reconstructLine
+  )
+where
+import Parsing.AST ( AST(..), (<!) )
+import System.FilePath (splitPath, (</>))
+import System.Console.Pretty
 
-import Tokenizer (Token (..), runAll, Parser (runParser))
-import Parsing.Parser
-import GHC.IO
-import Text.Parsec (parse)
+-- | Extracts the String from AST type
+fromASTtoString :: AST -> String
+fromASTtoString (Identifier s _) = s
+fromASTtoString (Keyword s _) = s
+fromASTtoString (Operator s _) = s
+fromASTtoString (Comment s _) = "#" ++ s
 
--- next (x:xs) = xs
--- next [] = []
+-- | Prints file path, excluding the base path 
+(<->) :: FilePath -> FilePath -> FilePath
+base <-> file =
+  let
+    b' = splitPath base
+    f' = splitPath file
 
--- findNextToken :: [Token] -> Token -> Maybe [Token]
--- findNextToken (x:xs) t = if t == x then Just (x:xs) else findNextToken xs t
--- findNextToken [] _ = Nothing
-
--- findNextInLine :: [Token] -> Token -> Maybe [Token]
--- findNextInLine (x:xs) t
---   | x == Seperator "\n" = Nothing
---   | x == t = Just (x:xs)
---   | otherwise = findNextToken xs t
--- findNextInLine [] t = Nothing
-
-findNextToken :: [Token] -> Token -> Maybe [Token]
-findNextToken (x:xs) t = case x of
-  Seperator "\n" -> Nothing 
-  _ -> if x == t then Just (x:xs) else findNextToken xs t
-  -- Identifier s -> undefined
-  -- Keyword s -> undefined
-  -- Seperator s -> undefined
-  -- Operator s -> undefined
-  -- Comment s -> undefined
-  -- Error -> undefined
-findNextToken [] _ = Nothing 
+    f = drop (length b') f'
+  in
+    foldr (</>) "" f
 
 
-test :: [Token] -> Maybe Token
-test (x:xs) = case x of
-  Seperator s -> Nothing
-  _  -> Just x 
-test [] = Nothing 
+-- createOutputString :: [[(Int, String)]] -> FilePath ->  [AST] -> [String]
+-- createOutputString ([]:xs) f a = createOutputString xs f a
+-- -- createOutputString (x:xs) f a = (f ++ "| line: " ++ show (fst $ head x) ++ reconstructLine a) : createOutputString xs f a
+-- createOutputString (x:xs) f a = undefined 
+-- createOutputString [] _  _= []
+
+createOutputString :: [(Int, String)] -> FilePath -> [AST] -> [String]
+createOutputString (x:xs) f a = (color Cyan "File: " ++ color Cyan f ++ color Green " | line :" ++ color Red (show (fst x)) ++ color White (reconstructLine (filter (<! fst x) a)) ++ color Yellow " | " ++ color Yellow (snd x) ++ "\n" ) : createOutputString xs f a
+createOutputString [] _ _ = []
 
 
-
---TODO: Debug/test functions. Delete when later.
-
-mkt :: [Token]
-mkt = let
-    --Evil code, should never be used.
-    a  = unsafePerformIO $ readFile "test//GdScript//test1.gd"
-    in
-        runAll a
-
-mkt2 :: [Token]
-mkt2 = let
-    --Evil code, should never be used.
-    a  = unsafePerformIO $ readFile "test//GdScript//test2.gd"
-    in
-        runAll a
-
-mkt3 :: [Token]
-mkt3 = let
-    --Evil code, should never be used.
-    a  = unsafePerformIO $ readFile "test//GdScript//test3.gd"
-    in
-        runAll a
-
-mkt4 = do
-  a <- readFile "test//GdScript//test1.gd"
-  b <- readFile "test//GdScript//test2.gd"
-  c <- readFile "test//GdScript//test3.gd"
-
-  putStrLn $ readExpr a
-  putStrLn "\n"
-  putStrLn $ readExpr b
-  putStrLn "\n"
-  putStrLn $ readExpr c
-  putStrLn "\n"
-
-
-readExpr :: String -> String
-readExpr input = case parse parseAll "test1" input of
-    Left err -> "No match: \n" ++ show err
-    Right val -> "Found value \n" ++ show val
+reconstructLine :: [AST] -> String
+reconstructLine (x:xs) = " " ++ fromASTtoString x ++ reconstructLine xs
+reconstructLine [] = []
