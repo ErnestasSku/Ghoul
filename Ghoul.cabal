@@ -5,11 +5,11 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           Ghoul
-version:        0.1.0
+version:        0.2.0
 description:    Please see the README on GitHub at <https://github.com/ErnestasSku/Ghoul#readme>
 homepage:       https://github.com/ErnestasSku/Ghoul#readme
 bug-reports:    https://github.com/ErnestasSku/Ghoul/issues
-author:         Ernestas Škudzinsas
+author:         Ernestas Škudzinskas
 maintainer:     example@example.com
 copyright:      2022 Ernestas Škudzinskas
 license:        BSD3
