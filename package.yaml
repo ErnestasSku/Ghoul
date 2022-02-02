@@ -24,6 +24,8 @@ dependencies:
 - parsec >= 3 && < 4
 - text 
 - filepath
+- pretty-terminal
+
 
 library:
   source-dirs: src
@@ -39,7 +41,6 @@ executables:
     dependencies:
     - Ghoul
     - directory >= 1.3 && < 1.4
-    - pretty-terminal
 
     
 

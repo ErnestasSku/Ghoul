@@ -28,6 +28,7 @@ library
       Parsing.AST
       Parsing.Parser
       Rules.CommentChecker
+      Rules.Rules
       Rules.TypeChecker
       Tokenizer
       Utilites
@@ -39,6 +40,7 @@ library
       base >=4.7 && <5
     , filepath
     , parsec ==3.*
+    , pretty-terminal
     , text
   default-language: Haskell2010
 
@@ -73,5 +75,6 @@ test-suite Ghoul-test
     , base >=4.7 && <5
     , filepath
     , parsec ==3.*
+    , pretty-terminal
     , text
   default-language: Haskell2010
