@@ -5,22 +5,24 @@ module Main where
 -- import Lib
 -- import System.Console.Rainbow
 import Control.Monad (forM, forM_)
-import qualified Data.Text.IO as T
+import Data.Foldable (concatMap)
 import Data.List (intersperse, intercalate)
+import qualified Data.Text.IO as T
+-- import Data.Version
+import Parsing.Parser (parseAll)
+-- import Paths_xmonad (version)
+import Rules.Rules (rulesList)
+import Rules.TypeChecker (typeCheck)
 import System.Console.Pretty
 import System.Directory ( getCurrentDirectory, doesDirectoryExist, listDirectory )
 import System.Environment ( getArgs )
 import System.FilePath ( takeExtension, (</>) )
-import Rules.TypeChecker (typeCheck)
-import Parsing.Parser (parseAll)
 import Text.Parsec (parse)
-import Rules.Rules (rulesList)
-import Data.Foldable (concatMap)
 import Utilites (createOutputString, (<->))
 
 
 version :: String
-version = "Ghoul 0.1.0"
+version = "Ghoul 0.2.0"
 
 main :: IO ()
 main = do

@@ -6,6 +6,8 @@ module Parsing.Parser where
 import Control.Monad
 import Parsing.AST
 import Text.ParserCombinators.Parsec
+import Text.Parsec (modifyState)
+import Data.Char (isAlphaNum)
 
 
 keywordsList :: [String]
@@ -192,19 +194,21 @@ operator = do
   op <- genListParsers' operatorList string
   return $ Operator op (l, c)
 
--- #TODO improve identifier later
-
 -- | Parser an identifier
 identifier :: Parser AST
 identifier = do
-  _ <- many space
+  _ <- many space 
+  _ <- many $ char  ','
+  _ <- many space 
   pos <- getPosition
   let l = sourceLine pos
   let c = sourceColumn pos
-  id <- manyTill idParser (oneOf " []{}(),.:\n\t\r\f\v")
-  return $ Identifier id (l, c)
+  
+  f <- idParser
+  id <- many idParser
+  return $ Identifier (f:id) (l, c)
   where
-    idParser = alphaNum <|> char '_' <|> char '-' <|> char '"' <|> char '!'
+    idParser = satisfy (\a -> isAlphaNum a || a == '_' || a == '"' || a == '!')
 
 chunk :: Parser AST
 chunk =
@@ -212,7 +216,7 @@ chunk =
     <|> try keyword'
     <|> try comment
     <|> try operator
-    <|> identifier
+    <|> try identifier
 
 parseAll :: Parser [AST]
 parseAll = many chunk
