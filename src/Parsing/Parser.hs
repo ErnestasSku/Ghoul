@@ -1,7 +1,8 @@
-module Parsing.Parser where
-
---   ( parseAll,
---   )
+module Parsing.Parser
+  ( 
+    parseAll
+  )
+where
 
 import Control.Monad
 import Parsing.AST
