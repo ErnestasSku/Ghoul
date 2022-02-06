@@ -28,12 +28,6 @@ base <-> file =
     foldr (</>) "" f
 
 
--- createOutputString :: [[(Int, String)]] -> FilePath ->  [AST] -> [String]
--- createOutputString ([]:xs) f a = createOutputString xs f a
--- -- createOutputString (x:xs) f a = (f ++ "| line: " ++ show (fst $ head x) ++ reconstructLine a) : createOutputString xs f a
--- createOutputString (x:xs) f a = undefined 
--- createOutputString [] _  _= []
-
 createOutputString :: [(Int, String)] -> FilePath -> [AST] -> [String]
 createOutputString (x:xs) f a = (color Cyan "File: " ++ color Cyan f ++ color Green " | line :" ++ color Red (show (fst x)) ++ color White (reconstructLine (filter (<! fst x) a)) ++ color Yellow " | " ++ color Yellow (snd x) ++ "\n" ) : createOutputString xs f a
 createOutputString [] _ _ = []

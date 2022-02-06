@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Parsing.AST
+      Parsing.GhoulFile
       Parsing.Parser
       Rules.CommentChecker
       Rules.Rules
