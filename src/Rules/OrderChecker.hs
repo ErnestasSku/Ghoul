@@ -1,4 +1,4 @@
-module Rules.NeatOrdering (properOrder) where
+module Rules.OrderChecker (properOrder) where
 
 import Parsing.AST
 

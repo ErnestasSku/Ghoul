@@ -12,7 +12,7 @@ import Parsing.AST (AST)
 import qualified Parsing.AST
 import Rules.CommentChecker (commentCheck)
 import Rules.TypeChecker (typeCheck)
-import Rules.NeatOrdering (properOrder)
+import Rules.OrderChecker (properOrder)
 
 type RuleFunction = [AST] -> [(Int, String)]
 

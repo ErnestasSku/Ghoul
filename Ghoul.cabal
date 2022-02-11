@@ -29,7 +29,7 @@ library
       Parsing.GhoulFile
       Parsing.Parser
       Rules.CommentChecker
-      Rules.NeatOrdering
+      Rules.OrderChecker
       Rules.Rules
       Rules.TypeChecker
       Tokenizer
