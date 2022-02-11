@@ -70,7 +70,8 @@ getYesNo = do
 defaultRules =
   return
     [ RuleQ StaticTypes True,
-      RuleQ ProperComments True
+      RuleQ ProperComments True,
+      RuleQ ProperOrdering True
     ]
 
 -- | Asks question for which rules to use
