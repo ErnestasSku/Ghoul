@@ -209,6 +209,7 @@ identifier = do
   id <- many idParser
   return $ Identifier (f:id) (l, c)
   where
+    -- #TODO rewrite so it would accept a list of acceptable characters
     idParser = satisfy (\a -> isAlphaNum a || a == '_' || a == '"' || a == '!')
 
 chunk :: Parser AST

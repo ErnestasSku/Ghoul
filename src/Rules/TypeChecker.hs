@@ -1,4 +1,4 @@
-module Rules.TypeChecker where
+module Rules.TypeChecker (typeCheck) where
 
 -- import Tokenizer (Token (Keyword, Operator, Seperator), )
 import Utilites
@@ -13,9 +13,10 @@ typeCheck (x:xs) = case x of
       if s == "var" || s == "const"
         then
         let
-            op = xs !! 2 -- #TODO while the assigment should always be in 2nd position (after variable name), rewrite to be more "correct" in case of unexpected input
+           opList = filter (<! line) xs
+           boolOpList = map ((\x -> x == ":" || x == ":=") . fromASTtoString) opList
         in
-            if fromASTtoString op == ":" || fromASTtoString op == ":="
+            if or boolOpList
                 then typeCheck xs
                 else (line, "Variable is not staticly typed") : typeCheck xs
         else
