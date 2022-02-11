@@ -1,4 +1,4 @@
-module Rules.CommentChecker where
+module Rules.CommentChecker (commentCheck) where
 import Parsing.AST
 
 commentCheck :: [AST] -> [(Int, String)]
