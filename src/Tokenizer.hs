@@ -14,7 +14,7 @@ import Data.Maybe
 data Token
     = Identifier String
     | Keyword String
-    | Seperator String
+    | Separator String
     | Operator String
     -- | Literal String -- NOTE: Decided on not using Literal type, as I wouldn't have an easy way to tell Identifier and Literall appart 
     | Comment String
@@ -125,7 +125,7 @@ seperatorList :: [String]
 seperatorList = ["\n", "\r\n", " ", "\t", ";", ","]
 
 seperator :: Parser Token
-seperator = Seperator <$> genListParsers' seperatorList parseSequence
+seperator = Separator <$> genListParsers' seperatorList parseSequence
 
 operatorList :: [String]
 operatorList = ["->", "[", "]", ".", "(", ")", "{", "}", "~", "-", "*",

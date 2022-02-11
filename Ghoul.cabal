@@ -33,7 +33,7 @@ library
       Rules.Rules
       Rules.TypeChecker
       Tokenizer
-      Utilites
+      Utilities
   other-modules:
       Paths_Ghoul
   hs-source-dirs:

@@ -4,7 +4,7 @@ import Parsing.AST
 
 properOrder :: [AST] -> [(Int, String)]
 properOrder s = properOrder' s Signal
--- properOrder s = properOrder' s Uknown
+-- properOrder s = properOrder' s Unknown
 
 
 properOrder' :: [AST] -> Order -> [(Int, String)]
@@ -13,7 +13,7 @@ properOrder' (x:xs) state = case x of
         let
             ord = fromKeywordToOrder s
         in 
-            if fromEnum ord == fromEnum state || fromEnum ord == fromEnum Uknown  then properOrder' (filter (not . (<! line)) xs) state
+            if fromEnum ord == fromEnum state || fromEnum ord == fromEnum Unknown  then properOrder' (filter (not . (<! line)) xs) state
             else if fromEnum ord > fromEnum state then properOrder' (filter (not . (<! line)) xs) ord
             else (line, "Line " ++ show line ++ " is not ordered correctly. \n\t\tThe correct order should follow signal -> enums -> consts -> exported variables -> public/private variables -> onready variables" ) : properOrder' (filter (not . (<! line)) xs) ord
             -- undefined 
@@ -25,7 +25,7 @@ properOrder' [] _ = []
     simple exploration of GdScript, but in the future, it might change.
 -}
 data Order 
-    = Uknown -- 
+    = Unknown -- 
     -- | Extends
     | Signal
     | Enums
@@ -45,5 +45,5 @@ fromKeywordToOrder "export" = Exports
 fromKeywordToOrder "var" = Variables
 fromKeywordToOrder "onready" = Onready
 fromKeywordToOrder "func" = Funcs
-fromKeywordToOrder _ = Uknown
+fromKeywordToOrder _ = Unknown
 

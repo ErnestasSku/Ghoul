@@ -2,7 +2,7 @@ module Rules.Rules
   ( rulesList,
     RuleFunction,
     Rule (..),
-    RuleQuestionaire (..),
+    RuleQuestionnaire (..),
     fromRulesToFunc,
     fromRulesToStr,
   )
@@ -22,13 +22,13 @@ data Rule
   | ProperOrdering
   deriving (Show)
 
-data RuleQuestionaire = RuleQ Rule Bool
+data RuleQuestionnaire = RuleQ Rule Bool
   deriving (Show)
 
 rulesList :: [RuleFunction]
 rulesList = [typeCheck, commentCheck]
 
-fromRulesToFunc :: [RuleQuestionaire] -> [RuleFunction]
+fromRulesToFunc :: [RuleQuestionnaire] -> [RuleFunction]
 fromRulesToFunc (x : xs) = case x of
   RuleQ StaticTypes True -> typeCheck : fromRulesToFunc xs
   RuleQ ProperComments True -> commentCheck : fromRulesToFunc xs
@@ -36,7 +36,7 @@ fromRulesToFunc (x : xs) = case x of
   _ -> fromRulesToFunc xs
 fromRulesToFunc [] = []
 
-fromRulesToStr :: [RuleQuestionaire] -> [String]
+fromRulesToStr :: [RuleQuestionnaire] -> [String]
 fromRulesToStr (x : xs) = case x of
   RuleQ StaticTypes v -> ("\tStaticTyping = " ++ show v ++ "\n") : fromRulesToStr xs
   RuleQ ProperComments v -> ("\tProperComments = " ++ show v ++ "\n") : fromRulesToStr xs

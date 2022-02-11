@@ -1,7 +1,7 @@
 module Rules.TypeChecker (typeCheck) where
 
--- import Tokenizer (Token (Keyword, Operator, Seperator), )
-import Utilites
+-- import Tokenizer (Token (Keyword, Operator, Separator), )
+import Utilities
 import Data.Maybe (isJust)
 import Parsing.AST
 

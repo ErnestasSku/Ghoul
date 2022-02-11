@@ -1,10 +1,10 @@
 module Parsing.GhoulFile (parseRules) where
 
 import Control.Monad
-import Rules.Rules (Rule (..), RuleQuestionaire (..))
+import Rules.Rules (Rule (..), RuleQuestionnaire (..))
 import Text.ParserCombinators.Parsec
 
-parseRules :: String -> FilePath -> Either ParseError [RuleQuestionaire]
+parseRules :: String -> FilePath -> Either ParseError [RuleQuestionnaire]
 parseRules s f = parse p f s
 
 p = parseSignature >> many (try parseRule)
@@ -16,7 +16,7 @@ parseSignature = do
   notFollowedBy alphaNum
   return s
 
-parseRule :: Parser RuleQuestionaire
+parseRule :: Parser RuleQuestionnaire
 parseRule = do
   _ <- many space
   s <- many alphaNum

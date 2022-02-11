@@ -8,14 +8,14 @@ import Data.List (intercalate, intersperse)
 import qualified Data.Text.IO as T
 import Parsing.GhoulFile (parseRules)
 import Parsing.Parser (parseAll)
-import Rules.Rules (Rule (..), RuleFunction, RuleQuestionaire (..), fromRulesToFunc, fromRulesToStr, rulesList)
+import Rules.Rules (Rule (..), RuleFunction, RuleQuestionnaire (..), fromRulesToFunc, fromRulesToStr, rulesList)
 import Rules.TypeChecker (typeCheck)
 import System.Console.Pretty
 import System.Directory (doesDirectoryExist, doesFileExist, getCurrentDirectory, listDirectory)
 import System.Environment (getArgs)
 import System.FilePath (takeExtension, (</>))
 import Text.Parsec (parse, putState)
-import Utilites (createOutputString, (<->))
+import Utilities (createOutputString, (<->))
 
 version :: String
 version = "Ghoul 0.2.0"
@@ -30,7 +30,7 @@ mainArgs :: [String] -> IO ()
 mainArgs [] = do
   rules <- ghoulFile
   print rules
-  sophisitcatedRun $ fromRulesToFunc rules
+  sophisticatedRun $ fromRulesToFunc rules
 mainArgs ["init"] = mainInit
 mainArgs ["version"] = mainVersion
 mainArgs ["runAll"] = defaultRun
@@ -48,7 +48,7 @@ mainInit = do
     else do
       putStrLn "Generate a custom rule set? (Y/N)"
       c <- getYesNo
-      rl <- if c then initQuestioniare else defaultRules
+      rl <- if c then initQuestionnaire else defaultRules
 
       let msg = concat $ "[Rules]\n" : fromRulesToStr rl
       writeFile ghoulFile msg
@@ -75,8 +75,8 @@ defaultRules =
     ]
 
 -- | Asks question for which rules to use
-initQuestioniare :: IO [RuleQuestionaire]
-initQuestioniare = do
+initQuestionnaire :: IO [RuleQuestionnaire]
+initQuestionnaire = do
   putStrLn "Use static checking? (Y/N)"
 
   c <- getYesNo
@@ -98,11 +98,11 @@ mainVersion = do
 
 -- | Runs with default rules
 defaultRun :: IO ()
-defaultRun = sophisitcatedRun rulesList
+defaultRun = sophisticatedRun rulesList
 
 -- | Runs with specific rule list
-sophisitcatedRun :: [RuleFunction] -> IO ()
-sophisitcatedRun definedRules = do
+sophisticatedRun :: [RuleFunction] -> IO ()
+sophisticatedRun definedRules = do
   cwd <- getCurrentDirectory
   files <- findGdFiles cwd
 
@@ -121,7 +121,7 @@ sophisitcatedRun definedRules = do
   putStrLn $ intercalate "" $ concat output
 
 -- | Reads the rules.ghoul file
-ghoulFile :: IO [RuleQuestionaire]
+ghoulFile :: IO [RuleQuestionnaire]
 ghoulFile = do
   cwd <- getCurrentDirectory
   input <- readFile $ cwd </> "rules.ghoul"
