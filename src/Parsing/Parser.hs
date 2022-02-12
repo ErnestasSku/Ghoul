@@ -210,7 +210,7 @@ identifier = do
   return $ Identifier (f:id) (l, c)
   where
     -- #TODO rewrite so it would accept a list of acceptable characters
-    idParser = satisfy (\a -> isAlphaNum a || a == '_' || a == '"' || a == '!')
+    idParser = satisfy (\a -> isAlphaNum a || a == '_' || a == '"' || a == '!' || a == '$')
 
 chunk :: Parser AST
 chunk =

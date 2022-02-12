@@ -43,3 +43,4 @@ fromStringToRule :: String -> Rule
 fromStringToRule "StaticTyping" = StaticTypes
 fromStringToRule "ProperComments" = ProperComments
 fromStringToRule "ProperOrdering" = ProperOrdering
+fromStringToRule "DeepNode" = DeepNode

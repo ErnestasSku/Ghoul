@@ -29,6 +29,7 @@ library
       Parsing.GhoulFile
       Parsing.Parser
       Rules.CommentChecker
+      Rules.NoDeepNodesChecker
       Rules.OrderChecker
       Rules.Rules
       Rules.TypeChecker

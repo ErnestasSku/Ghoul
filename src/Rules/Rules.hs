@@ -13,6 +13,7 @@ import qualified Parsing.AST
 import Rules.CommentChecker (commentCheck)
 import Rules.TypeChecker (typeCheck)
 import Rules.OrderChecker (properOrder)
+import Rules.NoDeepNodesChecker (deepNode)
 
 type RuleFunction = [AST] -> [(Int, String)]
 
@@ -20,6 +21,7 @@ data Rule
   = StaticTypes
   | ProperComments
   | ProperOrdering
+  | DeepNode
   deriving (Show)
 
 data RuleQuestionnaire = RuleQ Rule Bool
@@ -33,6 +35,7 @@ fromRulesToFunc (x : xs) = case x of
   RuleQ StaticTypes True -> typeCheck : fromRulesToFunc xs
   RuleQ ProperComments True -> commentCheck : fromRulesToFunc xs
   RuleQ ProperOrdering True -> properOrder : fromRulesToFunc xs
+  RuleQ DeepNode True -> deepNode : fromRulesToFunc xs
   _ -> fromRulesToFunc xs
 fromRulesToFunc [] = []
 
@@ -41,4 +44,5 @@ fromRulesToStr (x : xs) = case x of
   RuleQ StaticTypes v -> ("\tStaticTyping = " ++ show v ++ "\n") : fromRulesToStr xs
   RuleQ ProperComments v -> ("\tProperComments = " ++ show v ++ "\n") : fromRulesToStr xs
   RuleQ ProperOrdering v -> ("\tProperOrdering = " ++ show v ++ "\n") : fromRulesToStr xs
+  RuleQ DeepNode v -> ("\tDeepNode = " ++ show v ++ "\n") : fromRulesToStr xs
 fromRulesToStr [] = []

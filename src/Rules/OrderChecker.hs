@@ -12,8 +12,9 @@ properOrder' (x:xs) state = case x of
     Keyword s (line, col) -> 
         let
             ord = fromKeywordToOrder s
-        in 
-            if fromEnum ord == fromEnum state || fromEnum ord == fromEnum Unknown  then properOrder' (filter (not . (<! line)) xs) state
+        in
+            if s == "func" then []
+            else if fromEnum ord == fromEnum state || fromEnum ord == fromEnum Unknown  then properOrder' (filter (not . (<! line)) xs) state
             else if fromEnum ord > fromEnum state then properOrder' (filter (not . (<! line)) xs) ord
             else (line, "Line " ++ show line ++ " is not ordered correctly. \n\t\tThe correct order should follow signal -> enums -> consts -> exported variables -> public/private variables -> onready variables" ) : properOrder' (filter (not . (<! line)) xs) ord
             -- undefined 
