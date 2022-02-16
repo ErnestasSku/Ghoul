@@ -9,6 +9,7 @@ import Parsing.AST
 import Text.ParserCombinators.Parsec
 import Text.Parsec (modifyState)
 import Data.Char (isAlphaNum)
+import Data.Monoid (Any(Any, getAny))
 
 
 keywordsList :: [String]
@@ -209,8 +210,24 @@ identifier = do
   id <- many idParser
   return $ Identifier (f:id) (l, c)
   where
-    -- #TODO rewrite so it would accept a list of acceptable characters
-    idParser = satisfy (\a -> isAlphaNum a || a == '_' || a == '"' || a == '!' || a == '$')
+    idParser = satisfy acceptable
+      where
+        {-
+            Explanation of how this function works.
+            
+            If something is a monoid, you can use a mappend function which looks like a -> a -> a
+            It's a binary operation which combines 2 monoids into one single monoid.
+            (->) operator is also a monoid, :info (->) gives us
+            instance Monoid b => Monoid (a -> b), therefore, our second operator has to be a monoid.
+
+            We are working with Char -> Bool function, but Bool is not a monoid (as there is too many ways to define a monoid for booleans)
+            So we use Any which is a monoid.
+
+            foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> n
+
+        -}
+        acceptable :: Char -> Bool
+        acceptable = getAny . foldMap (Any .) [isAlphaNum, (=='_'), (=='"'), (=='$')]
 
 chunk :: Parser AST
 chunk =
