@@ -41,6 +41,7 @@ executables:
     dependencies:
     - Ghoul
     - directory >= 1.3 && < 1.4
+    - ansi-terminal >= 0.11 && < 0.12
 
     
 
