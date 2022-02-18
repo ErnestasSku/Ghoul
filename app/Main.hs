@@ -127,10 +127,9 @@ ghoulFile = do
   input <- readFile $ cwd </> "rules.ghoul"
   let rules = parseRules input "rules.ghoul"
   print rules
-  case rules of 
+  case rules of
     Left err -> return []
     Right val -> return val
-
 
 -- | Recursively finds all files
 getRecursivePaths :: FilePath -> IO [FilePath]
