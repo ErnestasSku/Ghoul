@@ -95,8 +95,15 @@ gFuncExpr = do
       return $ name ++ ": " ++ type'
 
 --All properties
-qcTests :: [Property]
-qcTests = [prop_keyword, prop_builtIn, prop_Operators, prop_id, prop_varExpr, prop_funcExpr]
+qcTests :: [(Property, String)]
+qcTests =
+  [ (prop_keyword, "Keywords"),
+    (prop_builtIn, "Built in types"),
+    (prop_Operators, "Operators"),
+    (prop_id, "Identifier"),
+    (prop_varExpr, "variable expression"),
+    (prop_funcExpr, "function expression")
+  ]
 
 -- Properties
 prop_keyword :: Property

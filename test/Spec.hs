@@ -1,17 +1,17 @@
 import Test.HUnit
 import Data.Maybe
 import QuickCheckTests (qcTests)
-import Control.Monad (forM)
+import Control.Monad (forM, forM_)
 import Test.QuickCheck (quickCheck)
 import HUnitTests (primaryTestCases)
 
 main :: IO ()
 main = do
 
-    -- Quick Check Result
-    putStrLn "QuickCheck"
-    qcr <- forM qcTests quickCheck
-    print qcr
+    putStr "QuickCheck\n"
+    forM_ qcTests $ \(f, s) -> do
+        putStr $ s ++ ": "
+        quickCheck f
 
     putStrLn "\nHUnit"
     count <- runTestTT primaryTestCases
