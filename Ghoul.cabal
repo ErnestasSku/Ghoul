@@ -70,6 +70,7 @@ test-suite Ghoul-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      HUnitTests
       QuickCheckTests
       Paths_Ghoul
   hs-source-dirs:
