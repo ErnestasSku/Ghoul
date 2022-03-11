@@ -18,7 +18,7 @@ typeCheck (x:xs) = case x of
         in
             if or boolOpList
                 then typeCheck xs
-                else (line, "Variable is not staticly typed") : typeCheck xs
+                else (line, "Variable is not statically typed") : typeCheck xs
         else
       if s == "func"
           then
@@ -27,7 +27,7 @@ typeCheck (x:xs) = case x of
                 boolOpList = map ((== "->") . fromASTtoString) opList
             in
                 if or boolOpList then typeCheck xs
-                else (line, "Function is not staticly typed") : typeCheck xs
+                else (line, "Function is not statically typed") : typeCheck xs
           else typeCheck xs
   _ -> typeCheck xs
 typeCheck [] = []
