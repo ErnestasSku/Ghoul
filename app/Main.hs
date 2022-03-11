@@ -74,6 +74,12 @@ defaultRules =
       RuleQ ProperOrdering True
     ]
 
+{- #TODO: This is very imperative way of doing this. 
+   There probably is a better way.
+
+   [("Use static checking?", StaticTypes)] --Having a tuple of Strings and rules could be easier and more universal
+
+-}
 -- | Asks question for which rules to use
 initQuestionnaire :: IO [RuleQuestionnaire]
 initQuestionnaire = do
@@ -120,6 +126,7 @@ sophisticatedRun definedRules = do
 
   putStrLn $ intercalate "" $ concat output
 
+-- #TODO: Might be a good idea to consider moving it to another file like FileUtilities.
 -- | Reads the rules.ghoul file
 ghoulFile :: IO [RuleQuestionnaire]
 ghoulFile = do

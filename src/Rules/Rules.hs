@@ -27,6 +27,7 @@ data Rule
 data RuleQuestionnaire = RuleQ Rule Bool
   deriving (Show)
 
+-- #TODO: this does not seem correct at the moment. 
 rulesList :: [RuleFunction]
 rulesList = [typeCheck, commentCheck]
 
