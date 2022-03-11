@@ -76,6 +76,7 @@ test-suite Ghoul-test
   build-depends:
       Ghoul
     , HUnit
+    , QuickCheck
     , base >=4.7 && <5
     , filepath
     , parsec ==3.*

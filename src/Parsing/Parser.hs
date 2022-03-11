@@ -223,7 +223,7 @@ identifier = do
             We are working with Char -> Bool function, but Bool is not a monoid (as there is too many ways to define a monoid for booleans)
             So we use Any which is a monoid.
 
-            foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> n
+            foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
 
         -}
         acceptable :: Char -> Bool
