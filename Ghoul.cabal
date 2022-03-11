@@ -33,7 +33,6 @@ library
       Rules.OrderChecker
       Rules.Rules
       Rules.TypeChecker
-      Tokenizer
       Utilities
   other-modules:
       Paths_Ghoul
