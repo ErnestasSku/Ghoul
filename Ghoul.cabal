@@ -30,6 +30,8 @@ library
       Parsing.Internal.GdKeywords
       Parsing.Internal.ParserInternal
       Parsing.Parser
+      PrettyPrint.Pretty
+      PrettyPrint.Styles
       Rules.CommentChecker
       Rules.NoDeepNodesChecker
       Rules.OrderChecker
