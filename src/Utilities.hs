@@ -28,11 +28,15 @@ base <-> file =
     foldr (</>) "" f
 
 
-createOutputString :: [(Int, String)] -> FilePath -> [AST] -> [String]
-createOutputString (x:xs) f a = (color Cyan "File: " ++ color Cyan f ++ color Green " | line :" ++ color Red (show (fst x)) ++ color White (reconstructLine (filter (<! fst x) a)) ++ color Yellow " | " ++ color Yellow (snd x) ++ "\n" ) : createOutputString xs f a
+createOutputString :: [(Int, String)] -- [(Line in code, found warning)] 
+  -> FilePath -- File 
+  -> [AST] -- Full AST 
+  -> [(String, String, String, String)] -- (File path and name, line number, code excerpt, found warning)
+-- createOutputString (x:xs) f a = (color Cyan "File: " ++ color Cyan f ++ color Green " | line :" ++ color Red (show (fst x)) ++ color White (reconstructLine (filter (<! fst x) a)) ++ color Yellow " | " ++ color Yellow (snd x) ++ "\n" ) : createOutputString xs f a
+createOutputString (x:xs) f a = (f, show (fst x), reconstructLine (filter (<! fst x) a), snd x) : createOutputString xs f a
 createOutputString [] _ _ = []
 
-
+-- #TODO: make a show instance for AST
 reconstructLine :: [AST] -> String
 reconstructLine (x:xs) = " " ++ fromASTtoString x ++ reconstructLine xs
 reconstructLine [] = []
