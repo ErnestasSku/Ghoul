@@ -2,56 +2,60 @@
 
 module Main where
 
-import Control.Monad (forM, forM_)
-import Data.Foldable (concatMap)
-import Data.List (intercalate, intersperse)
-import qualified Data.Text.IO as T
+import Control.Monad (forM)
+--import Data.Foldable (concatMap)
+--import Data.List (intercalate, intersperse)
+--import qualified Data.Text.IO as T
 import Parsing.Parser (parseAll)
 import Rules.Rules (Rule (..), RuleFunction, RuleQuestionnaire (..), fromRulesToFunc, fromRulesToStr, rulesList, defaultRules)
-import Rules.TypeChecker (typeCheck)
 import System.Environment (getArgs)
-import Text.Parsec (parse, putState)
+import Text.Parsec (parse)
 import Utilities (createOutputString, (<->))
 import System.Directory (getCurrentDirectory, doesFileExist)
-import System.FilePath ((</>), takeExtension)
-import FileUtilities (ghoulFile)
+import System.FilePath ((</>))
+import FileUtilities (ghoulFile, findGdFiles)
+import PrettyPrint.Pretty (Output(..), Pretty (..), Color(..))
+import PrettyPrint.Styles (applyStyle, defaultTheme1)
 
 
 version :: String
 version = "Ghoul 0.2.0"
 
+
+
 --- ========== Main functions ==========
 main :: IO ()
 main = do
   args <- getArgs
-  mainArgs args
+  let currentMode = getMode args
+  print currentMode
+  mainArgs args currentMode
+
+  where
+    getMode (x:xs)
+      | x == "Editor" = Editor ()
+      | x == "Plain" = Plain ()
+      | x == "Terminal" = Terminal ()
+      | otherwise = getMode xs
+    getMode [] = Terminal ()
 
 -- #TODO I think this is not the best way of dealing with args. Rewrite later
-mainArgs :: [String] -> IO ()
-mainArgs ["init":args] = mainInit
-mainArgs ["version":args] = args
-mainArgs ["runAll":args] = defaultRun
-mainArgs [args] = defaultRun
-mainArgs [] = do
+mainArgs :: [String] -> Output () -> IO ()
+mainArgs ("init":args) mode = mainInit mode args
+mainArgs ("version":args) mode = mainVersion args mode
+mainArgs ("runAll":_) mode = defaultRun mode
+mainArgs [] mode = do
   rules <- ghoulFile
-  print rules -- #TODO: remove later
-  sophisticatedRun $ fromRulesToFunc rules
+  flip sophisticatedRun mode $ fromRulesToFunc rules
+mainArgs _ mode = defaultRun mode
 
--- mainArgs [] = do
---   rules <- ghoulFile
---   print rules
---   sophisticatedRun $ fromRulesToFunc rules
--- mainArgs ["init"] = mainInit
--- mainArgs ["version"] = mainVersion
--- mainArgs ["runAll"] = defaultRun
--- mainArgs _ = defaultRun
 
 -- | Initializes rules.ghoul file
-mainInit :: IO ()
-mainInit = do
+mainInit :: Output () -> [String] -> IO ()
+mainInit (Terminal _) _ = do
   cwd <- getCurrentDirectory
-  let ghoulFile = cwd </> "rules.ghoul"
-  x <- doesFileExist ghoulFile
+  let ghoulRulesFile = cwd </> "rules.ghoul"
+  x <- doesFileExist ghoulRulesFile
 
   if x
     then putStrLn "rules.ghoul file already exists"
@@ -61,20 +65,22 @@ mainInit = do
       rl <- if c then initQuestionnaire else defaultRules
 
       let msg = concat $ "[Rules]\n" : fromRulesToStr rl
-      writeFile ghoulFile msg
+      writeFile ghoulRulesFile msg
+mainInit _ _ = putStrLn "Not implemented for editor and plain"
 
 -- | Prints current version of the program
-mainVersion :: IO ()
-mainVersion = do
-  putStrLn version
+mainVersion :: [String] -> Output () -> IO ()
+mainVersion _ (Terminal _) = putStrLn $ color Yellow (Terminal version)
+mainVersion _ (Editor _) = putStrLn $ color Yellow (Editor version)
+mainVersion _ (Plain _) = putStrLn version
 
 -- | Runs with default rules
-defaultRun :: IO ()
+defaultRun :: Output () -> IO ()
 defaultRun = sophisticatedRun rulesList
 
 -- | Runs with specific rule list
-sophisticatedRun :: [RuleFunction] -> IO ()
-sophisticatedRun definedRules = do
+sophisticatedRun :: [RuleFunction] -> Output () -> IO ()
+sophisticatedRun definedRules mode = do
   cwd <- getCurrentDirectory
   files <- findGdFiles cwd
 
@@ -82,7 +88,7 @@ sophisticatedRun definedRules = do
     input <- readFile file
     let res = parse parseAll file input
     case res of
-      Left err -> return (file, [])
+      Left _ -> return (file, [])
       Right val -> return (file, val)
 
   output <- forM result $ \(file', ast) -> do
@@ -92,8 +98,11 @@ sophisticatedRun definedRules = do
     return $ createOutputString collapsed (cwd <-> file') ast
 
   let filtered = filter (not . null) output
-  -- putStrLn $ intercalate "" $ concat output
-  print filtered
+
+  putStrLn $ unlines $ applyStyle (head filtered) style mode
+  where
+    style = defaultTheme1
+
 
 --- ========== End of Main functions ==========
 
@@ -112,22 +121,22 @@ getYesNo = do
     'n' -> return False
     _ -> getYesNo
 
-{- #TODO: This is very imperative way of doing this. 
+{-- #TODO: This is very imperative way of doing this. 
    There probably is a better way.
 
    [("Use static checking?", StaticTypes)] --Having a tuple of Strings and rules could be easier and more universal
 
--}
+--}
 -- | Asks question for which rules to use
 initQuestionnaire :: IO [RuleQuestionnaire]
 initQuestionnaire = do
   putStrLn "Use static checking? (Y/N)"
 
-  c <- getYesNo
-  staticTypes <- if c then return $ RuleQ StaticTypes True else return $ RuleQ StaticTypes False
+  c1 <- getYesNo
+  staticTypes <- if c1 then return $ RuleQ StaticTypes True else return $ RuleQ StaticTypes False
 
   putStrLn "Use proper comment checking? (Y/N)"
-  c <- getYesNo
-  comments <- if c then return $ RuleQ ProperComments True else return $ RuleQ ProperComments False
+  c2 <- getYesNo
+  comments <- if c2 then return $ RuleQ ProperComments True else return $ RuleQ ProperComments False
 
   return [staticTypes, comments]

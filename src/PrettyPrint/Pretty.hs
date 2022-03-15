@@ -29,6 +29,7 @@ data Style = Normal | Bold | Faint | Italic | Underline | SlowBlink | ColoredNor
   deriving (Show, Enum)
 
 data Output a = Terminal a | Editor a | Plain a
+  deriving(Show)
 
 dropADT :: Output a -> a
 dropADT (Terminal a) = a
@@ -109,14 +110,14 @@ colorCodeInt (Custom rgb) = findClosest rgb
 colorCodeString :: Color -> String
 colorCodeString Black = "black"
 colorCodeString Red = "red"
-colorCodeString Green = "green"
+colorCodeString Green = "lime"
 colorCodeString Yellow = "yellow"
 colorCodeString Blue = "blue"
-colorCodeString Magenta = "FF00FF"
-colorCodeString Cyan = "00FFFF"
+colorCodeString Magenta = "#FF00FF"
+colorCodeString Cyan = "#00FFFF"
 colorCodeString White = "white"
 colorCodeString Default = "default"
-colorCodeString (Custom (r, g, b)) = hex r <> hex g <> hex b
+colorCodeString (Custom (r, g, b)) = "#" <> hex r <> hex g <> hex b
   where
     hex :: Int -> String
     hex x
