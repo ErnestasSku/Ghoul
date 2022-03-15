@@ -24,7 +24,8 @@ dependencies:
 - parsec >= 3 && < 4
 - text 
 - filepath
-- pretty-terminal
+- directory >= 1.3 && < 1.4
+
 
 
 library:
@@ -40,10 +41,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - Ghoul
-    - directory >= 1.3 && < 1.4
     - ansi-terminal >= 0.11 && < 0.12
-
-    
 
 tests:
   Ghoul-test:

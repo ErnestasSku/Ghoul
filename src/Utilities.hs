@@ -7,7 +7,6 @@ module Utilities
 where
 import Parsing.AST ( AST(..), (<!) )
 import System.FilePath (splitPath, (</>))
-import System.Console.Pretty
 
 -- | Extracts the String from AST type
 fromASTtoString :: AST -> String

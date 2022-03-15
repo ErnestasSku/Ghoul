@@ -5,6 +5,7 @@ module Rules.Rules
     RuleQuestionnaire (..),
     fromRulesToFunc,
     fromRulesToStr,
+    defaultRules
   )
 where
 
@@ -30,6 +31,16 @@ data RuleQuestionnaire = RuleQ Rule Bool
 -- #TODO: this does not seem correct at the moment. 
 rulesList :: [RuleFunction]
 rulesList = [typeCheck, commentCheck]
+
+-- | Default rules for typechecking
+defaultRules :: IO [RuleQuestionnaire]
+defaultRules =
+  return
+    [ RuleQ StaticTypes True,
+      RuleQ ProperComments True,
+      RuleQ ProperOrdering True,
+      RuleQ DeepNode True
+    ]
 
 fromRulesToFunc :: [RuleQuestionnaire] -> [RuleFunction]
 fromRulesToFunc (x : xs) = case x of
