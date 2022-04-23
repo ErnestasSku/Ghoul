@@ -23,7 +23,7 @@ import Data.Function (on)
 data Section = Foreground | Background
 
 data Color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White | Default | Custom (Int, Int, Int)
-  deriving (Show)
+  deriving (Show, Read)
 
 data Style = Normal | Bold | Faint | Italic | Underline | SlowBlink | ColoredNormal | Reverse
   deriving (Show, Enum)

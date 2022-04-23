@@ -115,7 +115,7 @@ identifier = do
 
         -}
         acceptable :: Char -> Bool
-        acceptable = getAny . foldMap (Any .) [isAlphaNum, (== '_'), (== '"'), (== '$')]
+        acceptable = getAny . foldMap (Any .) [isAlphaNum, (== '_'), (== '"'), (== '$'), (==';')]
 
 chunk :: Parser AST
 chunk =
