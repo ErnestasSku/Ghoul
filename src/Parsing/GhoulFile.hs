@@ -1,4 +1,4 @@
-module Parsing.GhoulFile (parseRules) where
+module Parsing.GhoulFile (parseRules, parseStyle) where
 
 import Control.Monad
 import PrettyPrint.Styles (OutputStyle (OutputStyle), defaultTheme1)

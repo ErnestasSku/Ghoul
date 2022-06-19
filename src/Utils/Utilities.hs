@@ -1,4 +1,4 @@
-module Utilities
+module Utils.Utilities
   ( fromASTtoString
   , (<->)
   , createOutputString

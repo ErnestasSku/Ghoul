@@ -1,4 +1,4 @@
-module FileUtilities
+module Utils.FileUtilities
   ( ghoulFile,
     getRecursivePaths,
     predicateFind,

@@ -16,6 +16,7 @@ data OutputStyle = OutputStyle
     osRuleColor :: Color,
     osSeparatorColor :: Maybe Color
   }
+  deriving(Show)
 
 defaultTheme1 :: OutputStyle
 defaultTheme1 = OutputStyle Cyan Cyan Green Red White Yellow Nothing
