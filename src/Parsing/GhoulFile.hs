@@ -2,7 +2,7 @@ module Parsing.GhoulFile (parseRules, parseStyle) where
 
 import Control.Monad
 import PrettyPrint.Styles (OutputStyle (OutputStyle), defaultTheme1)
-import Rules.Rules (Rule (..), RuleQuestionnaire (..))
+import Rules.Rules
 import Text.ParserCombinators.Parsec
   ( ParseError,
     Parser,
@@ -22,29 +22,22 @@ import Text.ParserCombinators.Parsec
 import PrettyPrint.Pretty (Color)
 import Data.Foldable (Foldable(foldr', fold))
 import Text.Parsec.Token (GenTokenParser(integer))
+import Parsing.Internal.ParserInternal (parseWord)
 
-parseRules :: String -> FilePath -> Either ParseError [RuleQuestionnaire]
+-- ==================== Ghoul File Parsing Section ====================  
+
+parseRules :: String -> FilePath -> Either ParseError [CompoundRule]
 parseRules s f = parse r f s
 
 parseStyle :: String -> FilePath -> Either ParseError OutputStyle
 parseStyle s f = parse os f s
-
-test = parseStyle txt "test file"
-
-txt = "[Rules]\n    StaticTyping = True\n    ProperComments = True\n[Style]\nFileColor = (255,255,255)\n    FileColorPath = Black\n    LineColor = Blue\n    LineNumberColor = Blue\n    CodeColor = Blue\n    RuleColor = Blue\n    SeparatorColor = Red"
 
 r = parseSignature "[Rules]" >> many (try parseRule)
 
 os = do
   manyTill anyToken (try $ string "[Style]")
   many space
-  -- string "[Style]"
-  -- parseSignature "[Style]"
   parseStyles
-
--- val :: Either a b -> a
-val (Left x) = x
--- val (Right x) = x
 
 parseSignature :: String -> Parser String
 parseSignature sig = do
@@ -53,16 +46,19 @@ parseSignature sig = do
   notFollowedBy alphaNum
   return s
 
-parseRule :: Parser RuleQuestionnaire
+parseRule :: Parser CompoundRule
 parseRule = do
   _ <- many space
-  s <- many alphaNum
+  s <- genRuleParser (map show $ (fullRuleList :: [CompoundRule]))
+  return (read s :: CompoundRule)
 
-  _ <- many space
-  _ <- char '='
-  _ <- many space
-  bool <- parseFalse <|> parseTrue
-  return $ RuleQ (fromStringToRule s) bool
+genRuleParser :: [String] -> Parser String
+genRuleParser = foldr ((<|>) . (try . parseWord)) fl
+
+fl :: Parser String
+fl = do
+  fail "exhausted reserved"
+
 
 parseTrue :: Parser Bool
 parseTrue = do
@@ -135,8 +131,3 @@ parseColor' = do
 specialSepField :: Parser String
 specialSepField = string "None"
 
-fromStringToRule :: String -> Rule
-fromStringToRule "StaticTyping" = StaticTypes
-fromStringToRule "ProperComments" = ProperComments
-fromStringToRule "ProperOrdering" = ProperOrdering
-fromStringToRule "DeepNode" = DeepNode
