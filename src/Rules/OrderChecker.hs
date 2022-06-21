@@ -25,8 +25,10 @@ properOrder' (x : xs) state = case x of
 properOrder' [] _ = []
 
 {-
-    Note, Tool is not added there, as I haven't encountered it in my
-    simple exploration of GdScript, but in the future, it might change.
+    #FIXME:
+    Note: Add Tool. It is rarely used in games, as Tool keyword
+    lets the to execute code in the editor, it's mostly used with 
+    Godot plugins 
 -}
 data Order
   = Unknown --
