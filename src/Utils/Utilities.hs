@@ -3,10 +3,21 @@ module Utils.Utilities
   , (<->)
   , createOutputString
   , reconstructLine
+  , getYesNo
+  , ToString(..)
   )
 where
 import Parsing.AST ( AST(..), (<!) )
 import System.FilePath (splitPath, (</>))
+
+{-
+
+-}
+class ToString a where
+  toString :: a -> String
+  toStringMulti :: a -> String -> String
+  toStringMulti a _ = toString a  
+
 
 -- | Extracts the String from AST type
 fromASTtoString :: AST -> String
@@ -39,3 +50,17 @@ createOutputString [] _ _ = []
 reconstructLine :: [AST] -> String
 reconstructLine (x:xs) = " " ++ fromASTtoString x ++ reconstructLine xs
 reconstructLine [] = []
+
+
+-- | gets either Yes or No.
+--  This is used to get around windows bug/requirement to press enter
+-- After each char input (unlike behavior in linux)
+getYesNo :: IO Bool
+getYesNo = do
+  c <- getChar
+  case c of
+    'Y' -> return True
+    'y' -> return True
+    'N' -> return False
+    'n' -> return False
+    _ -> getYesNo
