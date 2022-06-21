@@ -6,6 +6,7 @@ module Parsing.Internal.ParserInternal
     comment,
     keyword',
     keyword,
+    parseWord
   )
 where
 
