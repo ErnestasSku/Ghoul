@@ -5,8 +5,9 @@ import PrettyPrint.Pretty
     Output (..),
     Pretty (..),
   )
+import Utils.Utilities (ToString(..))
 
--- #TODO: This record doesn't have style
+-- 
 data OutputStyle = OutputStyle
   { osFileColor :: Color,
     osFilePathColor :: Color,
@@ -16,18 +17,30 @@ data OutputStyle = OutputStyle
     osRuleColor :: Color,
     osSeparatorColor :: Maybe Color
   }
-  deriving(Show)
+
+instance Show OutputStyle where
+  show = toString 
+
+instance ToString OutputStyle where
+  toString s = toStringMulti s "\n"
+  toStringMulti s delimiter =
+    "FileColor = " <> show (osFileColor s) <> delimiter <>
+    "FileColorPath = " <> show (osFilePathColor s) <> delimiter <>
+    "LineColor = " <> show (osLineColor s) <> delimiter <>
+    "LineNumberColor = " <> show (osLineNumberColor s) <> delimiter <>
+    "CodeColor = " <> show (osCodeColor s) <> delimiter <>
+    "RuleColor = " <> show (osRuleColor s) <> delimiter <>
+    "SeparatorColor = " <> showM (osSeparatorColor s)
+    
+    where
+      showM :: Maybe Color -> String
+      showM Nothing = "None"
+      showM (Just x) = show x
 
 defaultTheme1 :: OutputStyle
 defaultTheme1 = OutputStyle Cyan Cyan Green Red White Yellow Nothing
 
--- #TODO: Implement this function properly.
--- At the moment it returns just the only defined style.
-getStyle :: OutputStyle
-getStyle = defaultTheme1
-
 applyStyle :: [(String, String, String, String)] -> OutputStyle -> Output () -> [String]
--- applyStyle ((filepath, line, code, warning) : xs) style output = [(fileNotation ++ fileName ++ " " ++ firstSep ++ " " ++ lineNotation ++ lineNumber ++ " " ++ codeExcerpt ++ " " ++ secondSep ++ " " ++ warningNotation ++ "\n")]
 applyStyle ((filepath, line, code, warning) : xs) style output = (fileNotation ++ fileName ++ firstSep ++ lineNotation ++ lineNumber ++ " " ++ codeExcerpt ++ secondSep ++ warningNotation) : applyStyle xs style output
   where
     fileNotation = color (osFilePathColor style) $ lf output "File: " :: String

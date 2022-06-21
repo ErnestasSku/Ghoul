@@ -19,11 +19,25 @@ import Numeric (showHex)
 import Text.Printf (printf)
 import Data.List (sortBy, minimumBy)
 import Data.Function (on)
+import Text.Printf (printf)
 
 data Section = Foreground | Background
 
 data Color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White | Default | Custom (Int, Int, Int)
-  deriving (Show, Read)
+  deriving (Read)
+
+instance Show Color where
+  show x = case x of
+    Black -> "Black"
+    Red -> "Red"
+    Green -> "Green"
+    Yellow -> "Yellow"
+    Blue -> "Blue"
+    Magenta -> "Magenta"
+    Cyan -> "Cyan"
+    White -> "White"
+    Default -> "Default"
+    Custom (r, g, b) -> "(%d,%d,%d)" :: String
 
 data Style = Normal | Bold | Faint | Italic | Underline | SlowBlink | ColoredNormal | Reverse
   deriving (Show, Enum)
@@ -70,9 +84,6 @@ instance Pretty (Output String) where
         <> "[/color]"
   colorize _ _ (Plain a) = a
 
--- style sty (Terminal a) = undefined
--- style sty (Editor a) = undefined
--- style sty (Plain a) = undefined
 
 instance Pretty (Output T.Text) where
   colorize section color (Terminal a) = T.unpack $
