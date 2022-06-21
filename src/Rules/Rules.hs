@@ -67,23 +67,4 @@ readCompoundRule = concat . ruleGenerator
   where
     ruleGenerator s = map (\x -> [(x, left) | (y', left) <- lex s, y' == show x]) (fullRuleList :: [CompoundRule])
 
--- Old method of parsing rules 
--- readCompoundRule s = [(CRule StaticTypes True, left) | (x, left) <- lex s, x == st']
---                   ++ [(CRule StaticTypes False, left) | (x, left) <- lex s, x == noSt']
---                   ++ [(CRule ProperComments True, left) | (x, left) <- lex s, x == propCom']
---                   ++ [(CRule ProperComments False, left) | (x, left) <- lex s, x == noPropCom']
---                   ++ [(CRule ProperOrdering True, left) | (x, left) <- lex s, x == propOrd']
---                   ++ [(CRule ProperOrdering False, left) | (x, left) <- lex s, x == noPropOrd']
---                   ++ [(CRule DeepNode True, left) | (x, left) <- lex s, x == deepNod']
---                   ++ [(CRule DeepNode False, left) | (x, left) <- lex s, x == noDeepNod']
---   where
---     st' = show $ CRule StaticTypes True
---     noSt' = show $ CRule StaticTypes False
---     propCom' = show $ CRule ProperComments True
---     noPropCom' = show $ CRule ProperComments False
---     propOrd' = show $ CRule ProperOrdering True
---     noPropOrd' = show $ CRule ProperOrdering False
---     deepNod' = show $ CRule DeepNode True
---     noDeepNod' = show $ CRule DeepNode False
-
 
