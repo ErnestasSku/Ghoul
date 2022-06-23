@@ -11,6 +11,8 @@ module PrettyPrint.Pretty
     Section (..),
     -- Style (..),
     Output (..),
+    colorList,
+    intColorCode,
   )
 where
 
@@ -20,11 +22,16 @@ import Text.Printf (printf)
 import Data.List (sortBy, minimumBy)
 import Data.Function (on)
 import Text.Printf (printf)
+import Text.Parsec (Reply(Error))
 
 data Section = Foreground | Background
 
 data Color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White | Default | Custom (Int, Int, Int)
-  deriving (Read)
+  deriving (Read, Eq)
+
+-- Note: Default is not added, since it is not clear what default means.
+colorList :: [Color]
+colorList = [Black, Red, Green, Yellow, Blue, Magenta, Cyan, White] 
 
 instance Show Color where
   show x = case x of
@@ -117,6 +124,18 @@ colorCodeInt Cyan = 6
 colorCodeInt White = 7
 colorCodeInt Default = 8
 colorCodeInt (Custom rgb) = findClosest rgb
+
+intColorCode :: (Num a, Eq a) => a -> Color
+intColorCode 0 = Black 
+intColorCode 1 = Red 
+intColorCode 2 = Green 
+intColorCode 3 = Yellow 
+intColorCode 4 = Blue 
+intColorCode 5 = Magenta 
+intColorCode 6 = Cyan 
+intColorCode 7 = White 
+intColorCode 8 = Default 
+intColorCode _ = error "Exhausted all possible colors"
 
 colorCodeString :: Color -> String
 colorCodeString Black = "black"

@@ -1,12 +1,18 @@
-module PrettyPrint.Styles where
+module PrettyPrint.Styles
+  (
+    OutputStyle(..),
+    createStyle,
+    listOfStyleFields,
+    defaultTheme1,
+    applyStyle,
+    
+  ) 
+where
 
-import PrettyPrint.Pretty
-  ( Color (..),
-    Output (..),
-    Pretty (..),
-  )
+import PrettyPrint.Pretty( Color (..), Output (..), Pretty (..), intColorCode,)
 import Utils.Utilities (ToString(..))
-
+import Data.Function
+import Data.Maybe
 -- 
 data OutputStyle = OutputStyle
   { osFileColor :: Color,
@@ -18,8 +24,35 @@ data OutputStyle = OutputStyle
     osSeparatorColor :: Maybe Color
   }
 
+createStyle :: (Num a, Eq a) => [(String, a)] -> OutputStyle
+createStyle x =
+  let
+    fc = lookup "FileColor" x & fromJust & (intColorCode . subtract 1)
+    fpc = lookup "FileColorPath" x & fromJust & (intColorCode . subtract 1)
+    lc = lookup "LineColor" x & fromJust & (intColorCode . subtract 1)
+    lnc = lookup "LineNumberColor" x & fromJust & (intColorCode . subtract 1)
+    cc = lookup "CodeColor" x & fromJust & (intColorCode . subtract 1)
+    rc = lookup "RuleColor" x & fromJust & (intColorCode . subtract 1)
+    sc = if (lookup "SeparatorColor" x & fromJust & (intColorCode . subtract 1)) == Default 
+         then Nothing
+         else Just $ lookup "SeparatorColor" x & fromJust & (intColorCode . subtract 1)
+  in
+    OutputStyle 
+    {
+      osFileColor = fc,
+      osFilePathColor = fpc,
+      osLineColor = lc,
+      osLineNumberColor = lnc,
+      osCodeColor = cc,
+      osRuleColor = rc,
+      osSeparatorColor = sc
+    }
+
+listOfStyleFields :: [String]
+listOfStyleFields = ["FileColor", "FileColorPath", "LineColor", "LineNumberColor", "CodeColor", "RuleColor", "SeparatorColor"]
+
 instance Show OutputStyle where
-  show = toString 
+  show = toString
 
 instance ToString OutputStyle where
   toString s = toStringMulti s "\n"
@@ -31,7 +64,7 @@ instance ToString OutputStyle where
     "CodeColor = " <> show (osCodeColor s) <> delimiter <>
     "RuleColor = " <> show (osRuleColor s) <> delimiter <>
     "SeparatorColor = " <> showM (osSeparatorColor s)
-    
+
     where
       showM :: Maybe Color -> String
       showM Nothing = "None"
