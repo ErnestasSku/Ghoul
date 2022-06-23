@@ -9,7 +9,7 @@ import PrettyPrint.Styles (defaultTheme1, listOfStyleFields, createStyle)
 import Data.Maybe
 import Data.List
 import Utils.ArgUtils
-import Control.Monad (forM, forM_, when)
+import Control.Monad (forM, forM_, when, unless)
 import Rules.Rules (RuleType(..), CompoundRule (..), Rule(..))
 import Utils.Utilities (getYesNo, getNumberInput, getNumberInputRange)
 import Utils.FileUtilities
@@ -23,7 +23,7 @@ main = do
 
   let argRecord = buildArguments cliArgs
   --Note debugging
-  print argRecord
+  -- print argRecord
   if not (null (argCommands argRecord))
     then forM_ (argCommands argRecord) (runCommands argRecord)
     else defaultRun argRecord
@@ -42,103 +42,57 @@ main = do
 
 
 initialization :: Output () -> [ArgSettings] -> IO ()
-initialization (Terminal ()) sett = do
-  alreadyExists <- ghoulFileExists
-  if alreadyExists 
-    then do
-      putStrLn $ termWrapper (Yellow ,ghoulFileNameExtension <> " file already exists")
-      putStrLn $ termWrapper (Red, "Do you want to delete the while?")
-      putStrLn "y - will delete the file (if force argument was used it will reinitialize without terminating)\nn - will terminate the program"
-      delFile <- getYesNo
-      when delFile $ do 
-          deleteGhoulFile
-          when force $ initialization (Terminal ()) sett
-    else do
-    putStrLn $ termWrapper (Cyan, "Do you want to use custom rules? (y/n)\ny - will initialize rule questionnaire\nn - will use all rules as default")
-    custRul <- getYesNo -- custRul = Custom Rules
-    rules <- if custRul 
-      then mapM genFunctionInteractive (ruleList :: [Rule]) 
-      else genFunctionPassive
-
-    putStrLn $ termWrapper (Green, "Do you want to use a custom output style? (y/n)\ny - will initialize style questionnaire\nn - will use a default style")
-    custStyl <- getYesNo -- custStyl = Custom Style
-    style <- if custStyl
-      then do
-        putStrLn "Note that you can only chose built in colors during init via terminal"
-        
-        res1 <- forM (init listOfStyleFields) \x -> do
-          putStrLn $ termWrapper(Yellow, "===== " <> x <> " =====")
-          putStrLn colorOptions
-          colorNum <- getNumberInputRange 1 ((fromIntegral . length) colorList)
-          return (x, colorNum)
-        -- Separator field is special
-        res2 <- do 
-          putStrLn $ termWrapper(Yellow, "===== " <> last listOfStyleFields <> " =====")
-          putStrLn colorOptions'
-          colorNum <- getNumberInputRange 1 ((fromIntegral . length) colorList')
-          return (last listOfStyleFields, colorNum)
-
-
-        let result = res1 ++ [res2]
-        print $ createStyle result
-        return defaultTheme1
-      else return defaultTheme1
-
-    writeNewGhoulFile rules style
-
-  where
-    genFunctionInteractive :: Rule -> IO CompoundRule
-    genFunctionInteractive rl = do
-        putStrLn $ "Uses " <> show rl <> " rule? (y/n)"
-        when verbose $ putStrLn (ruleDescription rl)
-        CRule rl <$> getYesNo
-    
-    genFunctionPassive :: IO [CompoundRule]
-    genFunctionPassive = return ruleList
-    
-    zpConv :: [(Int, Color)] -> String
-    zpConv (x:xs) = (show . fst) x <> " - " <> (show . snd) x <> "\n" <> zpConv xs
-    zpConv [] = ""
-
-    colorOptions = zpConv (zip [1..] colorList)
-    colorList' = colorList ++ [Default]
-    colorOptions' = zpConv (zip [1..] colorList')
-
-    verbose = Verbose `elem` sett
-    force = Force `elem` sett
+{-
+  Editor will use to access this function to initialize rules and styles.
+  #TODO: 
+-}
 initialization (Editor ()) sett = undefined
-initialization (Plain ()) sett = do
+{-
+  Using when unless is better than duplicating the same exact code.
+  However, it still be achieved more cleanly.
+  #TODO: Improve.
+-}
+initialization mode sett = do
   alreadyExists <- ghoulFileExists
   if alreadyExists 
     then do
-      putStrLn $ termWrapper (Yellow ,ghoulFileNameExtension <> " file already exists")
-      putStrLn $ termWrapper (Red, "Do you want to delete the while?")
+      
+      when colorful $ putStrLn $ termWrapper (Yellow ,ghoulFileNameExtension <> " file already exists")
+      unless colorful $ putStrLn "file already exists"
+      when colorful $ putStrLn $ termWrapper (Red, "Do you want to delete the while?")
+      unless colorful $ putStrLn "Do you want to delete the while?"
+      
       putStrLn "y - will delete the file (if force argument was used it will reinitialize without terminating)\nn - will terminate the program"
       delFile <- getYesNo
       when delFile $ do 
           deleteGhoulFile
           when force $ initialization (Terminal ()) sett
     else do
-    putStrLn $ termWrapper (Cyan, "Do you want to use custom rules? (y/n)\ny - will initialize rule questionnaire\nn - will use all rules as default")
+    when colorful $ putStrLn $ termWrapper (Cyan, "Do you want to use custom rules? (y/n)\ny - will initialize rule questionnaire\nn - will use all rules as default")
+    unless colorful $ putStrLn "Do you want to use custom rules? (y/n)\ny - will initialize rule questionnaire\nn - will use all rules as default"
     custRul <- getYesNo -- custRul = Custom Rules
     rules <- if custRul 
       then mapM genFunctionInteractive (ruleList :: [Rule]) 
       else genFunctionPassive
 
-    putStrLn $ termWrapper (Green, "Do you want to use a custom output style? (y/n)\ny - will initialize style questionnaire\nn - will use a default style")
+    when colorful $ putStrLn $ termWrapper (Green, "Do you want to use a custom output style? (y/n)\ny - will initialize style questionnaire\nn - will use a default style")
+    unless colorful $ putStrLn "Do you want to use a custom output style? (y/n)\ny - will initialize style questionnaire\nn - will use a default style"
+    
     custStyl <- getYesNo -- custStyl = Custom Style
     style <- if custStyl
       then do
         putStrLn "Note that you can only chose built in colors during init via terminal"
         
         res1 <- forM (init listOfStyleFields) \x -> do
-          putStrLn $ termWrapper(Yellow, "===== " <> x <> " =====")
+          when colorful $ putStrLn $ termWrapper(Yellow, "===== " <> x <> " =====")
+          unless colorful $ putStrLn $ "===== " <> x <> " ====="
           putStrLn colorOptions
           colorNum <- getNumberInputRange 1 ((fromIntegral . length) colorList)
           return (x, colorNum)
         -- Separator field is special
         res2 <- do 
-          putStrLn $ termWrapper(Yellow, "===== " <> last listOfStyleFields <> " =====")
+          when colorful $ putStrLn $ termWrapper(Yellow, "===== " <> last listOfStyleFields <> " =====")
+          unless colorful $ putStrLn $ "===== " <> last listOfStyleFields <> " ====="
           putStrLn colorOptions'
           colorNum <- getNumberInputRange 1 ((fromIntegral . length) colorList')
           return (last listOfStyleFields, colorNum)
@@ -171,7 +125,11 @@ initialization (Plain ()) sett = do
 
     verbose = Verbose `elem` sett
     force = Force `elem` sett
-
+    colorful = colorful' mode
+    colorful' (Terminal()) = True
+    colorful' (Plain ()) = False
+    colorful' _ = error "main - init - colorful'. Should not happen"
+-- initialization (Plain ()) sett = undefined
 
 helpCommand :: Output () -> [ArgSettings] -> IO ()
 helpCommand (Terminal ()) args = do
