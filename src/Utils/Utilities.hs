@@ -5,10 +5,13 @@ module Utils.Utilities
   , reconstructLine
   , getYesNo
   , ToString(..)
+  , getNumberInput
+  , getNumberInputRange
   )
 where
 import Parsing.AST ( AST(..), (<!) )
 import System.FilePath (splitPath, (</>))
+import Data.Char (isNumber)
 
 {-
 
@@ -16,7 +19,7 @@ import System.FilePath (splitPath, (</>))
 class ToString a where
   toString :: a -> String
   toStringMulti :: a -> String -> String
-  toStringMulti a _ = toString a  
+  toStringMulti a _ = toString a
 
 
 -- | Extracts the String from AST type
@@ -63,4 +66,19 @@ getYesNo = do
     'y' -> return True
     'N' -> return False
     'n' -> return False
-    _ -> getYesNo
+    _ -> do
+      -- putStrLn "Incorrect input"
+      getYesNo
+
+getNumberInput :: IO Integer
+getNumberInput = do
+  c <- getLine
+  let digits = takeWhile isNumber c
+  if null digits then getNumberInput
+  else return $ read digits 
+
+getNumberInputRange :: Integer -> Integer -> IO Integer
+getNumberInputRange min max = do
+  num <- getNumberInput
+  if num >= min && num <= max then return num
+  else getNumberInputRange min max

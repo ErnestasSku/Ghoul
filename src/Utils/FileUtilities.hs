@@ -9,12 +9,13 @@ module Utils.FileUtilities
     ghoulFileNameExtension,
     ghoulFileExists,
     writeNewGhoulFile,
+    deleteGhoulFile,
   )
 where
 
 -- import Rules.OldRules (RuleQuestionnaire)
 import Rules.Rules
-import System.Directory (doesDirectoryExist, doesFileExist, getCurrentDirectory, listDirectory, getAccessTime)
+import System.Directory (doesDirectoryExist, doesFileExist, getCurrentDirectory, listDirectory, getAccessTime, removeFile)
 import System.FilePath (takeExtension, (</>))
 import Control.Monad (forM)
 import Parsing.GhoulFile (parseRules, parseStyle)
@@ -102,3 +103,6 @@ writeNewGhoulFile :: (GhoulWritable a, Show a, GhoulWritable b, Show b) =>
 writeNewGhoulFile r s = do
   gh <- getCurrentGhoulDirectory
   writeFile gh $ showGhoulList r <> showGhoulSingle s
+
+deleteGhoulFile :: IO ()
+deleteGhoulFile = getCurrentGhoulDirectory >>= \x -> removeFile x

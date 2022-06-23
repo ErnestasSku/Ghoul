@@ -5,6 +5,7 @@ module Utils.ArgUtils
       ArgCommands(..)
     , ArgSettings(..)
     , Arguments(..)
+    , ArgDict (..)
     , buildArguments
   )
 where
@@ -12,8 +13,11 @@ where
 import Control.Applicative ((<|>))
 import PrettyPrint.Pretty (Output(..))
 import Data.Maybe ( fromJust, isJust )
+import Data.List (intercalate)
 
 class ArgDict a where
+  argList :: [a]
+  argDescription :: a -> String
   argKeywords :: a -> [String]
   argNames :: a -> [(String, a)]
   argNames x = [(s, x) | s <- argKeywords x]
@@ -23,10 +27,35 @@ data ArgCommands = Init | Version | Help | RunAll
   deriving (Show)
 
 
-data ArgSettings = Verbose | RuleInput [String] | StyleInput [String]
-  deriving (Show, Eq)
+data ArgSettings = Verbose | Force | RuleInput [String] | StyleInput [String]
+  deriving (Eq)
+
+instance Show ArgSettings where
+  show Verbose = "Verbose"
+  show Force = "Force"
+  show (RuleInput []) = "RuleInput"
+  show (RuleInput x) = "RuleInput [" <> intercalate ", " (map show x) <> "]"
+  show (StyleInput []) = "StyleInput"
+  show (StyleInput x) = "StyleInput [" <> intercalate ", " (map show x) <> "]"
+
+-- instance Eq ArgSettings where
+--   Verbose == Verbose = True
+--   Verbose == (RuleInput _) = False
+--   Verbose == (StyleInput _) = False
+--   (RuleInput _) == (RuleInput _) = True
+--   (RuleInput _) == (StyleInput _) = False
+--   (StyleInput _) == (StyleInput _) = True
+  
 
 instance ArgDict ArgCommands where
+  argList = [Init, Version, Help, RunAll]
+
+  argDescription Init = "Initializes ghoul configuration"
+  argDescription Version = "Displays the current version of the program"
+  argDescription Help = "Displays information about how the program is used"
+  argDescription RunAll = "Runs all defined rules regardless of configuration"
+
+
   argKeywords Init = ["Init", "init"]
   argKeywords Version = ["Version", "version"]
   argKeywords Help = ["Help", "help"]
@@ -42,7 +71,15 @@ instance ArgDict ArgCommands where
       init' <|> ver' <|> help' <|> run'
 
 instance ArgDict ArgSettings where
+  argList = [Verbose, Force, RuleInput [], StyleInput []]
+
+  argDescription Verbose = "Verbose mode. Prints extra information during commands such as during initialization"
+  argDescription Force = "Allows to continue initialization process without terminating"
+  argDescription (RuleInput _) = "Input for rules. Specifies which rules to run. Also used for editor plugin"
+  argDescription (StyleInput _) = "Custom style input. Mostly used by editor"
+
   argKeywords Verbose = ["-v", "-verbose", "-Verbose"]
+  argKeywords Force = ["-force", "-f"]
   argKeywords (RuleInput _) = ["-rules"]
   argKeywords (StyleInput _) = ["-style"]
 
