@@ -1,6 +1,6 @@
 module Rules.TypeChecker (typeCheck) where
 
-import Utilities
+import Utils.Utilities
 import Data.Maybe (isJust)
 import Parsing.AST
 

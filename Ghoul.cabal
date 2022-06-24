@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           Ghoul
-version:        0.2.0
+version:        0.3.0
 description:    Please see the README on GitHub at <https://github.com/ErnestasSku/Ghoul#readme>
 homepage:       https://github.com/ErnestasSku/Ghoul#readme
 bug-reports:    https://github.com/ErnestasSku/Ghoul/issues
@@ -25,7 +25,6 @@ source-repository head
 
 library
   exposed-modules:
-      FileUtilities
       Parsing.AST
       Parsing.GhoulFile
       Parsing.Internal.GdKeywords
@@ -35,10 +34,13 @@ library
       PrettyPrint.Styles
       Rules.CommentChecker
       Rules.NoDeepNodesChecker
+      Rules.OldRules
       Rules.OrderChecker
       Rules.Rules
       Rules.TypeChecker
-      Utilities
+      Utils.ArgUtils
+      Utils.FileUtilities
+      Utils.Utilities
   other-modules:
       Paths_Ghoul
   hs-source-dirs:
@@ -54,6 +56,7 @@ library
 executable Ghoul
   main-is: Main.hs
   other-modules:
+      OldMain
       Paths_Ghoul
   hs-source-dirs:
       app

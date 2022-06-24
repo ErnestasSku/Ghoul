@@ -1,142 +1,174 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE BlockArguments #-}
 
 module Main where
 
-import Control.Monad (forM)
---import Data.Foldable (concatMap)
---import Data.List (intercalate, intersperse)
---import qualified Data.Text.IO as T
-import Parsing.Parser (parseAll)
-import Rules.Rules (Rule (..), RuleFunction, RuleQuestionnaire (..), fromRulesToFunc, fromRulesToStr, rulesList, defaultRules)
 import System.Environment (getArgs)
-import Text.Parsec (parse)
-import Utilities (createOutputString, (<->))
-import System.Directory (getCurrentDirectory, doesFileExist)
-import System.FilePath ((</>))
-import FileUtilities (ghoulFile, findGdFiles)
-import PrettyPrint.Pretty (Output(..), Pretty (..), Color(..))
-import PrettyPrint.Styles (applyStyle, defaultTheme1)
+import PrettyPrint.Pretty (Output(..), Pretty (..), Color (..), colorList)
+import PrettyPrint.Styles (defaultTheme1, listOfStyleFields, createStyle)
+import Data.Maybe
+import Data.List
+import Utils.ArgUtils
+import Control.Monad (forM, forM_, when, unless)
+import Rules.Rules (RuleType(..), CompoundRule (..), Rule(..))
+import Utils.Utilities (getYesNo, getNumberInput, getNumberInputRange)
+import Utils.FileUtilities
 
 
-version :: String
-version = "Ghoul 0.2.0"
+emptySpace = "    "
 
-
-
---- ========== Main functions ==========
 main :: IO ()
 main = do
-  args <- getArgs
-  let currentMode = getMode args
-  print currentMode
-  mainArgs args currentMode
+  cliArgs <- getArgs
+
+  let argRecord = buildArguments cliArgs
+  --Note debugging
+  -- print argRecord
+  if not (null (argCommands argRecord))
+    then forM_ (argCommands argRecord) (runCommands argRecord)
+    else defaultRun argRecord
 
   where
-    getMode (x:xs)
-      | x == "Editor" = Editor ()
-      | x == "Plain" = Plain ()
-      | x == "Terminal" = Terminal ()
-      | otherwise = getMode xs
-    getMode [] = Terminal ()
+    runCommands :: Arguments -> ArgCommands -> IO ()
+    runCommands args@Arguments {argOutputMode=mode, argSettings=settings} Init = initialization mode settings
+    runCommands args@Arguments {argOutputMode=mode, argSettings=settings} Version = undefined
+    runCommands args@Arguments {argOutputMode=mode, argSettings=settings} Help = helpCommand mode settings
+    runCommands args@Arguments {argOutputMode=mode, argSettings=settings} RunAll = undefined
 
--- #TODO I think this is not the best way of dealing with args. Rewrite later
-mainArgs :: [String] -> Output () -> IO ()
-mainArgs ("init":args) mode = mainInit mode args
-mainArgs ("version":args) mode = mainVersion args mode
-mainArgs ("runAll":_) mode = defaultRun mode
-mainArgs [] mode = do
-  rules <- ghoulFile
-  flip sophisticatedRun mode $ fromRulesToFunc rules
-mainArgs _ mode = defaultRun mode
+    defaultRun :: Arguments -> IO ()
+    defaultRun = undefined
 
 
--- | Initializes rules.ghoul file
-mainInit :: Output () -> [String] -> IO ()
-mainInit (Terminal _) _ = do
-  cwd <- getCurrentDirectory
-  let ghoulRulesFile = cwd </> "rules.ghoul"
-  x <- doesFileExist ghoulRulesFile
 
-  if x
-    then putStrLn "rules.ghoul file already exists"
+
+initialization :: Output () -> [ArgSettings] -> IO ()
+{-
+  Editor will use to access this function to initialize rules and styles.
+  #TODO: 
+-}
+initialization (Editor ()) sett = undefined
+{-
+  Using when unless is better than duplicating the same exact code.
+  However, it still be achieved more cleanly.
+  #TODO: Improve.
+-}
+initialization mode sett = do
+  alreadyExists <- ghoulFileExists
+  if alreadyExists 
+    then do
+      
+      when colorful $ putStrLn $ termWrapper (Yellow ,ghoulFileNameExtension <> " file already exists")
+      unless colorful $ putStrLn "file already exists"
+      when colorful $ putStrLn $ termWrapper (Red, "Do you want to delete the while?")
+      unless colorful $ putStrLn "Do you want to delete the while?"
+      
+      putStrLn "y - will delete the file (if force argument was used it will reinitialize without terminating)\nn - will terminate the program"
+      delFile <- getYesNo
+      when delFile $ do 
+          deleteGhoulFile
+          when force $ initialization (Terminal ()) sett
     else do
-      putStrLn "Generate a custom rule set? (Y/N)"
-      c <- getYesNo
-      rl <- if c then initQuestionnaire else defaultRules
+    when colorful $ putStrLn $ termWrapper (Cyan, "Do you want to use custom rules? (y/n)\ny - will initialize rule questionnaire\nn - will use all rules as default")
+    unless colorful $ putStrLn "Do you want to use custom rules? (y/n)\ny - will initialize rule questionnaire\nn - will use all rules as default"
+    custRul <- getYesNo -- custRul = Custom Rules
+    rules <- if custRul 
+      then mapM genFunctionInteractive (ruleList :: [Rule]) 
+      else genFunctionPassive
 
-      let msg = concat $ "[Rules]\n" : fromRulesToStr rl
-      writeFile ghoulRulesFile msg
-mainInit _ _ = putStrLn "Not implemented for editor and plain"
+    when colorful $ putStrLn $ termWrapper (Green, "Do you want to use a custom output style? (y/n)\ny - will initialize style questionnaire\nn - will use a default style")
+    unless colorful $ putStrLn "Do you want to use a custom output style? (y/n)\ny - will initialize style questionnaire\nn - will use a default style"
+    
+    custStyl <- getYesNo -- custStyl = Custom Style
+    style <- if custStyl
+      then do
+        putStrLn "Note that you can only chose built in colors during init via terminal"
+        
+        res1 <- forM (init listOfStyleFields) \x -> do
+          when colorful $ putStrLn $ termWrapper(Yellow, "===== " <> x <> " =====")
+          unless colorful $ putStrLn $ "===== " <> x <> " ====="
+          putStrLn colorOptions
+          colorNum <- getNumberInputRange 1 ((fromIntegral . length) colorList)
+          return (x, colorNum)
+        -- Separator field is special
+        res2 <- do 
+          when colorful $ putStrLn $ termWrapper(Yellow, "===== " <> last listOfStyleFields <> " =====")
+          unless colorful $ putStrLn $ "===== " <> last listOfStyleFields <> " ====="
+          putStrLn colorOptions'
+          colorNum <- getNumberInputRange 1 ((fromIntegral . length) colorList')
+          return (last listOfStyleFields, colorNum)
 
--- | Prints current version of the program
-mainVersion :: [String] -> Output () -> IO ()
-mainVersion _ (Terminal _) = putStrLn $ color Yellow (Terminal version)
-mainVersion _ (Editor _) = putStrLn $ color Yellow (Editor version)
-mainVersion _ (Plain _) = putStrLn version
 
--- | Runs with default rules
-defaultRun :: Output () -> IO ()
-defaultRun = sophisticatedRun rulesList
+        let result = res1 ++ [res2]
+        print $ createStyle result
+        return defaultTheme1
+      else return defaultTheme1
 
--- | Runs with specific rule list
-sophisticatedRun :: [RuleFunction] -> Output () -> IO ()
-sophisticatedRun definedRules mode = do
-  cwd <- getCurrentDirectory
-  files <- findGdFiles cwd
+    writeNewGhoulFile rules style
 
-  result <- forM files $ \file -> do
-    input <- readFile file
-    let res = parse parseAll file input
-    case res of
-      Left _ -> return (file, [])
-      Right val -> return (file, val)
-
-  output <- forM result $ \(file', ast) -> do
-    let mapped = map ($ ast) definedRules
-    let collapsed = concat mapped
-
-    return $ createOutputString collapsed (cwd <-> file') ast
-
-  let filtered = filter (not . null) output
-
-  putStrLn $ unlines $ applyStyle (head filtered) style mode
   where
-    style = defaultTheme1
+    genFunctionInteractive :: Rule -> IO CompoundRule
+    genFunctionInteractive rl = do
+        putStrLn $ "Uses " <> show rl <> " rule? (y/n)"
+        when verbose $ putStrLn (ruleDescription rl)
+        CRule rl <$> getYesNo
+    
+    genFunctionPassive :: IO [CompoundRule]
+    genFunctionPassive = return ruleList
+    
+    zpConv :: [(Int, Color)] -> String
+    zpConv (x:xs) = (show . fst) x <> " - " <> (show . snd) x <> "\n" <> zpConv xs
+    zpConv [] = ""
 
+    colorOptions = zpConv (zip [1..] colorList)
+    colorList' = colorList ++ [Default]
+    colorOptions' = zpConv (zip [1..] colorList')
 
---- ========== End of Main functions ==========
+    verbose = Verbose `elem` sett
+    force = Force `elem` sett
+    colorful = colorful' mode
+    colorful' (Terminal()) = True
+    colorful' (Plain ()) = False
+    colorful' _ = error "main - init - colorful'. Should not happen"
+-- initialization (Plain ()) sett = undefined
 
+helpCommand :: Output () -> [ArgSettings] -> IO ()
+helpCommand (Terminal ()) args = do
+  putStrLn $ termWrapper (Yellow, "Here are the main commands")
+  forM_ (argList :: [ArgCommands]) \x -> do
+    putStr $ emptySpace <> show x <> "\t\t" <> argDescription x
+    putStr "\n"
 
---- ========== Auxiliary functions for main functions ==========
--- | gets either Yes or No.
---  This is used to get around windows bug/requirement to press enter
--- After each char input (unlike behavior in linux)
-getYesNo :: IO Bool
-getYesNo = do
-  c <- getChar
-  case c of
-    'Y' -> return True
-    'y' -> return True
-    'N' -> return False
-    'n' -> return False
-    _ -> getYesNo
+  putStrLn $ termWrapper (Cyan, "Arguments which can be supplied")
+  forM_ (argList :: [ArgSettings]) \x -> do
+    putStr $ emptySpace <> show x <> "\t\t" <> argDescription x
+    putStr "\n"
+  
+  putStrLn $ termWrapper (Yellow, "Arguments which can be supplied")
+  forM_ (ruleList :: [Rule]) \x -> do
+      putStr $ emptySpace <> show x <> "\t\t" <> ruleDescription x
+      putStr "\n"
 
-{-- #TODO: This is very imperative way of doing this. 
-   There probably is a better way.
+helpCommand (Editor ()) args = do
+  -- putStrLn "Rules"
+  forM_ (ruleList :: [Rule]) \x -> do
+    putStrLn $ show x <> " | " <> ruleDescription x
+  -- putStrLn "Style"
+helpCommand (Plain ()) args = do
+  putStrLn "Here are the main commands"
+  forM_ (argList :: [ArgCommands]) \x -> do
+    putStr $ emptySpace <> show x <> "\t\t" <> argDescription x
+    putStr "\n"
 
-   [("Use static checking?", StaticTypes)] --Having a tuple of Strings and rules could be easier and more universal
+  putStrLn "Arguments which can be supplied"
+  forM_ (argList :: [ArgSettings]) \x -> do
+    putStr $ emptySpace <> show x <> "\t\t" <> argDescription x
+    putStr "\n"
+  
+  putStrLn "Arguments which can be supplied"
+  forM_ (ruleList :: [Rule]) \x -> do
+      putStr $ emptySpace <> show x <> "\t\t" <> ruleDescription x
+      putStr "\n"
+  
 
---}
--- | Asks question for which rules to use
-initQuestionnaire :: IO [RuleQuestionnaire]
-initQuestionnaire = do
-  putStrLn "Use static checking? (Y/N)"
-
-  c1 <- getYesNo
-  staticTypes <- if c1 then return $ RuleQ StaticTypes True else return $ RuleQ StaticTypes False
-
-  putStrLn "Use proper comment checking? (Y/N)"
-  c2 <- getYesNo
-  comments <- if c2 then return $ RuleQ ProperComments True else return $ RuleQ ProperComments False
-
-  return [staticTypes, comments]
+termWrapper :: (Color, String) -> String
+termWrapper (col, str) = color col (Terminal str)

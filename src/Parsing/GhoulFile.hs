@@ -1,31 +1,64 @@
-module Parsing.GhoulFile (parseRules) where
+module Parsing.GhoulFile (parseRules, parseStyle) where
 
 import Control.Monad
-import Rules.Rules (Rule (..), RuleQuestionnaire (..))
+import PrettyPrint.Styles (OutputStyle (OutputStyle), defaultTheme1)
+import Rules.Rules
 import Text.ParserCombinators.Parsec
+  ( ParseError,
+    Parser,
+    alphaNum,
+    anyChar,
+    anyToken,
+    char,
+    many,
+    manyTill,
+    notFollowedBy,
+    parse,
+    space,
+    string,
+    try,
+    (<|>), digit
+  )
+import PrettyPrint.Pretty (Color)
+import Data.Foldable (Foldable(foldr', fold))
+import Text.Parsec.Token (GenTokenParser(integer))
+import Parsing.Internal.ParserInternal (parseWord)
 
-parseRules :: String -> FilePath -> Either ParseError [RuleQuestionnaire]
-parseRules s f = parse p f s
+-- ==================== Ghoul File Parsing Section ====================  
 
-p = parseSignature >> many (try parseRule)
+parseRules :: String -> FilePath -> Either ParseError [CompoundRule]
+parseRules s f = parse r f s
 
-parseSignature :: Parser String
-parseSignature = do
+parseStyle :: String -> FilePath -> Either ParseError OutputStyle
+parseStyle s f = parse os f s
+
+r = parseSignature "[Rules]" >> many (try parseRule)
+
+os = do
+  manyTill anyToken (try $ string "[Style]")
+  many space
+  parseStyles
+
+parseSignature :: String -> Parser String
+parseSignature sig = do
   _ <- many space
-  s <- string "[Rules]"
+  s <- string sig
   notFollowedBy alphaNum
   return s
 
-parseRule :: Parser RuleQuestionnaire
+parseRule :: Parser CompoundRule
 parseRule = do
   _ <- many space
-  s <- many alphaNum
+  s <- genRuleParser (map show $ (fullRuleList :: [CompoundRule]))
+  return (read s :: CompoundRule)
 
-  _ <- many space
-  _ <- char '='
-  _ <- many space
-  bool <- parseFalse <|> parseTrue
-  return $ RuleQ (fromStringToRule s) bool
+genRuleParser :: [String] -> Parser String
+genRuleParser = foldr ((<|>) . (try . parseWord)) fl
+
+fl :: Parser String
+fl = do
+  fail "exhausted reserved"
+
 
 parseTrue :: Parser Bool
 parseTrue = do
@@ -39,8 +72,62 @@ parseFalse = do
   notFollowedBy alphaNum
   return False
 
-fromStringToRule :: String -> Rule
-fromStringToRule "StaticTyping" = StaticTypes
-fromStringToRule "ProperComments" = ProperComments
-fromStringToRule "ProperOrdering" = ProperOrdering
-fromStringToRule "DeepNode" = DeepNode
+parseStyles :: Parser OutputStyle
+parseStyles = do
+  many space
+  string "FileColor = "
+  fileColor <- try parseColor <|> parseColor'
+  many space
+  string "FileColorPath = "
+  fileColorPath <- try parseColor <|> parseColor'
+  many space
+  string "LineColor = "
+  lineColor <- try parseColor <|> parseColor'
+  many space
+  string "LineNumberColor = "
+  lineNumberColor <- try parseColor <|> parseColor'
+  many space
+  string "CodeColor = "
+  codeColor <- try parseColor <|> parseColor'
+  many space
+  string "RuleColor = "
+  ruleColor <- try parseColor <|> parseColor'
+  many space
+  string "SeparatorColor = "
+  separator <- try parseColor <|> try parseColor' <|> specialSepField
+
+  return $ OutputStyle (read fileColor) (read fileColorPath) (read lineColor) (read lineNumberColor) (read codeColor) (read ruleColor) (Just $ read separator)
+
+colors :: [String]
+colors =
+  [ "Black",
+    "Red",
+    "Green",
+    "Yellow",
+    "Blue",
+    "Magenta",
+    "Cyan",
+    "White",
+    "Default"
+  ]
+
+parseColor :: Parser String
+parseColor = foldr ((<|>) . try . string) fl colors
+  where
+    fl = fail "exhausted"
+
+parseColor' :: Parser String
+parseColor' = do
+  char '('
+  r <- many digit
+  char ','
+  g <- many digit
+  char ','
+  b <- many digit
+  char ')'
+
+  return $ "Custom " <> "(" <> r <> "," <> g <> "," <> b <> ")"
+
+specialSepField :: Parser String
+specialSepField = string "None"
+
