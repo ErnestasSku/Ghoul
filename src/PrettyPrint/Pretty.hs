@@ -49,6 +49,8 @@ instance Show Color where
 data Style = Normal | Bold | Faint | Italic | Underline | SlowBlink | ColoredNormal | Reverse
   deriving (Show, Enum)
 
+-- As it is (Type a), It should be possible to implement a monad,
+-- However not clear how useful it would be.
 data Output a = Terminal a | Editor a | Plain a
   deriving(Show)
 

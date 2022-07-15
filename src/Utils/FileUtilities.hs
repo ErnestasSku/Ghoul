@@ -49,7 +49,7 @@ ghoulFileRules :: IO [CompoundRule]
 ghoulFileRules = do
   ghoulF <- getCurrentGhoulDirectory
   input <- readFile ghoulF 
-  let rules = parseRules input ghoulFileNameExtension
+  let rules = parseRules ghoulFileNameExtension input
   print rules
   case rules of
     Left err -> return []
