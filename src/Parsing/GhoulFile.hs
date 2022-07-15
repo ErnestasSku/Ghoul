@@ -26,11 +26,11 @@ import Parsing.Internal.ParserInternal (parseWord)
 
 -- ==================== Ghoul File Parsing Section ====================  
 
-parseRules :: String -> FilePath -> Either ParseError [CompoundRule]
-parseRules s f = parse r f s
+parseRules :: FilePath -> String -> Either ParseError [CompoundRule]
+parseRules = parse r
 
-parseStyle :: String -> FilePath -> Either ParseError OutputStyle
-parseStyle s f = parse os f s
+parseStyle :: FilePath -> String  -> Either ParseError OutputStyle
+parseStyle = parse os
 
 r = parseSignature "[Rules]" >> many (try parseRule)
 
@@ -96,7 +96,10 @@ parseStyles = do
   string "SeparatorColor = "
   separator <- try parseColor <|> try parseColor' <|> specialSepField
 
-  return $ OutputStyle (read fileColor) (read fileColorPath) (read lineColor) (read lineNumberColor) (read codeColor) (read ruleColor) (Just $ read separator)
+  return $ OutputStyle (read fileColor) (read fileColorPath) (read lineColor) (read lineNumberColor) (read codeColor) (read ruleColor) (read' separator)
+  where
+    read' "None" = Nothing
+    read' x = Just $ read x
 
 colors :: [String]
 colors =
