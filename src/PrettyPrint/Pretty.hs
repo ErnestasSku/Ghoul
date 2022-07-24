@@ -54,6 +54,11 @@ data Style = Normal | Bold | Faint | Italic | Underline | SlowBlink | ColoredNor
 data Output a = Terminal a | Editor a | Plain a
   deriving(Show)
 
+instance Functor Output where
+  fmap f (Terminal a) = Terminal $ f a
+  fmap f (Editor a) = Editor $ f a 
+  fmap f (Plain a) = Plain $ f a
+
 dropADT :: Output a -> a
 dropADT (Terminal a) = a
 dropADT (Editor a) = a
